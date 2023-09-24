@@ -14,8 +14,8 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
-    @PostMapping("/{userId}")
-    public UserDto createUser(final @PathVariable int userId, final @RequestBody UserDto userDto) {
+    @PostMapping
+    public UserDto createUser(final @RequestBody UserDto userDto) {
         return null;
     }
 
