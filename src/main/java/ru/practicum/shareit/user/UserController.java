@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 
@@ -16,26 +17,26 @@ public class UserController {
 
     @PostMapping
     public UserDto createUser(final @RequestBody UserDto userDto) {
-        return null;
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(final @PathVariable int userId, final @RequestBody UserDto userDto) {
-        return null;
+        return userService.update(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public UserDto deleteUserById(final @PathVariable int userId) {
-        return null;
+        return userService.deleteById(userId);
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(final @PathVariable int userId) {
-        return null;
+        return userService.getById(userId);
     }
 
     @GetMapping
     public Collection<UserDto> getAllUsers() {
-        return null;
+        return userService.getAll();
     }
 }
