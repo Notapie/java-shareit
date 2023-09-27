@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.service.impl;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.user.dto.UserObjectMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
@@ -17,17 +19,34 @@ public class UserServiceInMemoryImpl implements UserService {
     private final EmailValidator emailValidator;
     private final Map<Integer, User> idToUser;
     private final Map<String, User> emailToUser;
+    private int idCounter;
 
     public UserServiceInMemoryImpl(EmailValidator emailValidator) {
         this.idToUser = new HashMap<>();
         this.emailToUser = new HashMap<>();
         this.emailValidator = emailValidator;
+        this.idCounter = 1;
     }
 
     @Override
     public UserResponseDto create(UserRequestDto userRequestDto) {
+        // validate data
         validateToCreate(userRequestDto);
-        return null;
+
+        // check email duplicates
+        if (emailToUser.containsKey(userRequestDto.getEmail())) {
+            throw new AlreadyExistsException("User with email " + userRequestDto.getEmail() + " already exists");
+        }
+
+        // create user from dto
+        final User user = UserObjectMapper.fromUserRequestDto(userRequestDto, idCounter++);
+
+        // insert new user into storage
+        idToUser.put(user.getId(), user);
+        emailToUser.put(user.getEmail(), user);
+
+        // return created user
+        return UserObjectMapper.toUserResponseDto(user);
     }
 
     @Override
