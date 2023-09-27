@@ -3,7 +3,8 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
@@ -16,27 +17,27 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public UserDto createUser(final @RequestBody UserDto userDto) {
-        return userService.create(userDto);
+    public UserResponseDto createUser(final @RequestBody UserRequestDto userRequestDto) {
+        return userService.create(userRequestDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(final @PathVariable int userId, final @RequestBody UserDto userDto) {
-        return userService.update(userId, userDto);
+    public UserResponseDto updateUser(final @PathVariable int userId, final @RequestBody UserRequestDto userRequestDto) {
+        return userService.update(userId, userRequestDto);
     }
 
     @DeleteMapping("/{userId}")
-    public UserDto deleteUserById(final @PathVariable int userId) {
+    public UserResponseDto deleteUserById(final @PathVariable int userId) {
         return userService.deleteById(userId);
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUserById(final @PathVariable int userId) {
+    public UserResponseDto getUserById(final @PathVariable int userId) {
         return userService.getById(userId);
     }
 
     @GetMapping
-    public Collection<UserDto> getAllUsers() {
+    public Collection<UserResponseDto> getAllUsers() {
         return userService.getAll();
     }
 }

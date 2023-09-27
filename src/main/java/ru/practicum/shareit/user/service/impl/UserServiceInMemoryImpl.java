@@ -2,7 +2,8 @@ package ru.practicum.shareit.user.service.impl;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.EmailValidator;
 import ru.practicum.shareit.user.service.UserService;
@@ -24,41 +25,37 @@ public class UserServiceInMemoryImpl implements UserService {
     }
 
     @Override
-    public UserDto create(UserDto userDto) {
-        validate(userDto);
+    public UserResponseDto create(UserRequestDto userRequestDto) {
+        validate(userRequestDto);
         return null;
     }
 
     @Override
-    public UserDto update(int userId, UserDto userDto) {
+    public UserResponseDto update(int userId, UserRequestDto userRequestDto) {
         return null;
     }
 
     @Override
-    public UserDto deleteById(int userId) {
+    public UserResponseDto deleteById(int userId) {
         return null;
     }
 
     @Override
-    public UserDto getById(int userId) {
+    public UserResponseDto getById(int userId) {
         return null;
     }
 
     @Override
-    public Collection<UserDto> getAll() {
+    public Collection<UserResponseDto> getAll() {
         return null;
     }
 
-    private void validate(UserDto userDto) {
-        if (userDto.getId() == null) {
-            throw new ValidationException("User id is null");
-        }
-
-        if (userDto.getEmail() == null) {
+    private void validate(UserRequestDto userRequestDto) {
+        if (userRequestDto.getEmail() == null) {
             throw new ValidationException("User email is null");
         }
 
-        if (!emailValidator.validate(userDto.getEmail())) {
+        if (!emailValidator.validate(userRequestDto.getEmail())) {
             throw new ValidationException("Invalid email");
         }
     }
