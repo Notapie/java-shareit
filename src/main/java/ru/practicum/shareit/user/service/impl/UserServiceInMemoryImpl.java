@@ -2,12 +2,15 @@ package ru.practicum.shareit.user.service.impl;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
+import java.util.Map;
 
 @Service
 public class UserServiceInMemoryImpl implements UserService {
+    private Map<Integer, User> idToUser;
 
     @Override
     public UserDto create(UserDto userDto) {
