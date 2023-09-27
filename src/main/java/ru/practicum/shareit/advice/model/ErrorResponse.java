@@ -1,4 +1,4 @@
-package ru.practicum.shareit.advice;
+package ru.practicum.shareit.advice.model;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;

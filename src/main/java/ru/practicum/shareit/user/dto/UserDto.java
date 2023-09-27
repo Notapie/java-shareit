@@ -6,4 +6,5 @@ import lombok.Value;
 public class UserDto {
     Integer id;
     String name;
+    String email;
 }
