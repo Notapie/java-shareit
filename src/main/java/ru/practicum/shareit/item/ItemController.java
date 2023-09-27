@@ -18,27 +18,27 @@ public class ItemController {
     @PostMapping
     public ItemDto createItem(final @RequestBody ItemDto itemDto,
                               final @RequestHeader(name = "X-Sharer-User-Id") int userId) {
-        return null;
+        return itemService.create(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(final @PathVariable int itemId, final @RequestBody ItemDto itemDto,
                               final @RequestHeader(name = "X-Sharer-User-Id") int userId) {
-        return null;
+        return itemService.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(final @PathVariable int itemId) {
-        return null;
+        return itemService.getById(itemId);
     }
 
     @GetMapping
     public Collection<ItemDto> getAllUserItems(final @RequestHeader(name = "X-Sharer-User-Id") int userId) {
-        return null;
+        return itemService.getAllUserItems(userId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> searchItem(final @RequestParam String text) {
-        return null;
+        return itemService.search(text);
     }
 }
