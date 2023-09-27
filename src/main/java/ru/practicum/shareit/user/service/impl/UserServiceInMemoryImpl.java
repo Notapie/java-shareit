@@ -26,7 +26,7 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public UserResponseDto create(UserRequestDto userRequestDto) {
-        validate(userRequestDto);
+        validateToCreate(userRequestDto);
         return null;
     }
 
@@ -50,12 +50,15 @@ public class UserServiceInMemoryImpl implements UserService {
         return null;
     }
 
-    private void validate(UserRequestDto userRequestDto) {
+    private void validateToCreate(UserRequestDto userRequestDto) {
         if (userRequestDto.getEmail() == null) {
             throw new ValidationException("User email is null");
         }
+        emailValidate(userRequestDto.getEmail());
+    }
 
-        if (!emailValidator.validate(userRequestDto.getEmail())) {
+    private void emailValidate(String email) {
+        if (!emailValidator.validate(email)) {
             throw new ValidationException("Invalid email");
         }
     }
