@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.service.impl;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -15,27 +16,27 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private Map<Integer, List<Item>> userIdToItems;
 
     @Override
-    public ItemDto create(ItemDto itemDto, int userId) {
+    public ItemResponseDto create(ItemRequestDto itemRequestDto, int userId) {
         return null;
     }
 
     @Override
-    public ItemDto update(int userId, int itemId, ItemDto itemDto) {
+    public ItemResponseDto update(int userId, int itemId, ItemRequestDto itemRequestDto) {
         return null;
     }
 
     @Override
-    public ItemDto getById(int id) {
+    public ItemResponseDto getById(int id) {
         return null;
     }
 
     @Override
-    public Collection<ItemDto> getAllUserItems(int userId) {
+    public Collection<ItemResponseDto> getAllUserItems(int userId) {
         return null;
     }
 
     @Override
-    public Collection<ItemDto> search(String query) {
+    public Collection<ItemResponseDto> search(String query) {
         return null;
     }
 }
