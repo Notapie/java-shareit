@@ -18,7 +18,7 @@ public class UserController {
 
     @PostMapping
     public UserResponseDto createUser(final @RequestBody UserRequestDto userRequestDto) {
-        log.debug("Create user request. Name " + userRequestDto.getName() + ", email " + userRequestDto.getEmail());
+        log.debug("Create user request. " + userRequestDto);
         return userService.create(userRequestDto);
     }
 
