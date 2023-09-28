@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service.impl;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
@@ -51,7 +52,41 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public UserResponseDto update(int userId, UserRequestDto userRequestDto) {
-        return null;
+        // check if user exists by id
+        final User user = idToUser.get(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+
+        // if updating email, check if new email already exists and update builder
+        final User.UserBuilder userBuilder = user.toBuilder();
+        final String newEmail = userRequestDto.getEmail();
+        if (newEmail != null && !newEmail.equals(user.getEmail())) {
+            if (emailToUser.containsKey(newEmail)) {
+                throw new AlreadyExistsException("User with email " + newEmail + " already exists");
+            }
+            emailValidate(newEmail);
+            userBuilder.email(newEmail);
+        }
+
+        // update name in builder
+        final String newName = userRequestDto.getName();
+        if (newName != null) {
+            userBuilder.name(newName);
+        }
+
+        // update user object in storage
+        final User updatedUser = userBuilder.build();
+
+        idToUser.put(updatedUser.getId(), updatedUser);
+        emailToUser.put(updatedUser.getEmail(), updatedUser);
+
+        // and remove old email mapping
+        if (!updatedUser.getEmail().equals(user.getEmail())) {
+            emailToUser.remove(user.getEmail());
+        }
+
+        return UserObjectMapper.toUserResponseDto(updatedUser);
     }
 
     @Override
@@ -61,7 +96,12 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public UserResponseDto getById(int userId) {
-        return null;
+        // check if user exists by id
+        final User user = idToUser.get(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        return UserObjectMapper.toUserResponseDto(user);
     }
 
     @Override
