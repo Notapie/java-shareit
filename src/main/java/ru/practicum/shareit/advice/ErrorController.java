@@ -7,12 +7,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.advice.model.ErrorResponse;
 import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorController {
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse accessDenied(final ForbiddenException e) {
+        log.debug(e.getMessage());
+        return new ErrorResponse(
+                "Access denied", e.getMessage()
+        );
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse notFound(final NotFoundException e) {

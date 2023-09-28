@@ -73,8 +73,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
         if (itemRequestDto.getAvailable() != null) {
             itemBuilder.isAvailable(itemRequestDto.getAvailable());
         }
+        final Item newItem = itemBuilder.build();
 
-        return itemBuilder.build();
+        // save new item
+        idToItem.put(newItem.getId(), newItem);
+        getUserItemsMap(userId).put(newItem.getId(), newItem);
+
+        return newItem;
     }
 
     @Override
