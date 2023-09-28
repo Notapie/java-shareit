@@ -13,6 +13,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
 
         // check if user is owner
         if (!item.getOwnerId().equals(userId)) {
-            throw new ForbiddenException("The user with id " + userId + " is not the owner");
+            throw new ForbiddenException("User with id " + userId + " is not the item owner");
         }
 
         // build new item
@@ -94,7 +95,25 @@ public class ItemServiceInMemoryImpl implements ItemService {
 
     @Override
     public Collection<Item> search(String query) {
-        return null;
+        if (!StringUtils.hasText(query)) {
+            return Collections.emptyList();
+        }
+
+        // search
+        final Map<Integer, Item> searchResult = new HashMap<>();
+        for (final Item item : idToItem.values()) {
+            if (!item.getIsAvailable()) {
+                continue;
+            }
+
+            // check match
+            if (item.getName().toLowerCase().contains(query.toLowerCase())
+                    || item.getDescription().toLowerCase().contains(query.toLowerCase())) {
+                searchResult.put(item.getId(), item);
+            }
+        }
+
+        return searchResult.values();
     }
 
     private void validateToCreate(ItemRequestDto itemRequestDto) {
