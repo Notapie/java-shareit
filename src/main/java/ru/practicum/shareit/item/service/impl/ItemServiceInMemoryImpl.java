@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemObjectMapper;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
@@ -20,10 +22,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private final Map<Integer, Item> idToItem;
     private final Map<Integer, Map<Integer, Item>> userIdToItems;
 
+    private int itemCounter;
+
     public ItemServiceInMemoryImpl(UserService userService) {
         this.userService = userService;
         this.idToItem = new HashMap<>();
         this.userIdToItems = new HashMap<>();
+        this.itemCounter = 1;
     }
 
     @Override
@@ -35,23 +40,51 @@ public class ItemServiceInMemoryImpl implements ItemService {
         final User owner = userService.getById(userId);
 
         // get new Item object
-        final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, userId);
-        return null;
+        final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, userId, itemCounter++);
+
+        // save new item
+        idToItem.put(item.getId(), item);
+
+        final Map<Integer, Item> idToUserItems = getUserItemsMap(userId);
+        idToUserItems.put(item.getId(), item);
+
+        return item;
     }
 
     @Override
     public Item update(int userId, int itemId, ItemRequestDto itemRequestDto) {
-        return null;
+        // get item
+        final Item item = requireFindById(itemId);
+
+        // check if user is owner
+        if (!item.getOwnerId().equals(userId)) {
+            throw new ForbiddenException("The user with id " + userId + " is not the owner");
+        }
+
+        // build new item
+        final Item.ItemBuilder itemBuilder = item.toBuilder();
+
+        if (StringUtils.hasText(itemRequestDto.getName())) {
+            itemBuilder.name(itemRequestDto.getName());
+        }
+        if (StringUtils.hasText(itemRequestDto.getDescription())) {
+            itemBuilder.description(itemRequestDto.getDescription());
+        }
+        if (itemRequestDto.getAvailable() != null) {
+            itemBuilder.isAvailable(itemRequestDto.getAvailable());
+        }
+
+        return itemBuilder.build();
     }
 
     @Override
-    public Item getById(int id) {
-        return null;
+    public Item getById(int itemId) {
+        return requireFindById(itemId);
     }
 
     @Override
     public Collection<Item> getAllUserItems(int userId) {
-        return null;
+        return getUserItemsMap(userId).values();
     }
 
     @Override
@@ -72,5 +105,17 @@ public class ItemServiceInMemoryImpl implements ItemService {
             throw new ValidationException("Item description cannot be null or blank");
         }
 
+    }
+
+    private Map<Integer, Item> getUserItemsMap(int userId) {
+        return userIdToItems.computeIfAbsent(userId, k -> new HashMap<>());
+    }
+
+    private Item requireFindById(int itemId) {
+        final Item item = idToItem.get(itemId);
+        if (item == null) {
+            throw new NotFoundException("Item with id " + itemId + " not found");
+        }
+        return item;
     }
 }

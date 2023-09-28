@@ -14,8 +14,9 @@ public class ItemObjectMapper {
                 .build();
     }
 
-    public static Item fromItemRequestDto(ItemRequestDto itemRequestDto, int ownerId) {
+    public static Item fromItemRequestDto(ItemRequestDto itemRequestDto, int ownerId, int itemId) {
         return Item.builder()
+                .id(itemId)
                 .name(itemRequestDto.getName())
                 .description(itemRequestDto.getDescription())
                 .isAvailable(itemRequestDto.getAvailable())

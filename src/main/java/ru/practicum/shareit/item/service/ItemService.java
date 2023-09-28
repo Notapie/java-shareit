@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface ItemService {
     Item create(ItemRequestDto itemRequestDto, int userId);
     Item update(int userId, int itemId, ItemRequestDto itemRequestDto);
-    Item getById(int id);
+    Item getById(int itemId);
     Collection<Item> getAllUserItems(int userId);
     Collection<Item> search(String query);
 }
