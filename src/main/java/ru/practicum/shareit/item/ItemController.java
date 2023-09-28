@@ -13,7 +13,7 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public class ItemController {
-    private ItemService itemService;
+    private final ItemService itemService;
 
     @PostMapping
     public ItemDto createItem(final @RequestBody ItemDto itemDto,

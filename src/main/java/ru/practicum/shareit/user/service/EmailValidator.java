@@ -1,15 +1,17 @@
 package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
 
 @Service
+@PropertySource("classpath:application.properties")
 public class EmailValidator {
     private final String emailRegexPattern;
 
-    public EmailValidator(@Value("${email.regex}") final String emailRegex) {
+    public EmailValidator(@Value("${email.regex}") String emailRegex) {
         this.emailRegexPattern = emailRegex;
     }
 

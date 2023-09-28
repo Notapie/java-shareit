@@ -14,10 +14,11 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     public UserResponseDto createUser(final @RequestBody UserRequestDto userRequestDto) {
+        log.debug("Create user request. Name " + userRequestDto.getName() + ", email " + userRequestDto.getEmail());
         return userService.create(userRequestDto);
     }
 
