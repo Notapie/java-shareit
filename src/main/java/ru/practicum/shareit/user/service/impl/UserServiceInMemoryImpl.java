@@ -58,10 +58,11 @@ public class UserServiceInMemoryImpl implements UserService {
         final User.UserBuilder userBuilder = user.toBuilder();
         final String newEmail = userRequestDto.getEmail();
         if (newEmail != null && !newEmail.equals(user.getEmail())) {
+            emailValidate(newEmail);
+
             if (emailToUser.containsKey(newEmail)) {
                 throw new AlreadyExistsException("User with email " + newEmail + " already exists");
             }
-            emailValidate(newEmail);
             userBuilder.email(newEmail);
         }
 
