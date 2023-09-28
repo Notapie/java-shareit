@@ -6,7 +6,6 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
-import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.EmailValidator;
 import ru.practicum.shareit.user.service.UserService;
@@ -30,7 +29,7 @@ public class UserServiceInMemoryImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto create(UserRequestDto userRequestDto) {
+    public User create(UserRequestDto userRequestDto) {
         // validate data
         validateToCreate(userRequestDto);
 
@@ -47,11 +46,11 @@ public class UserServiceInMemoryImpl implements UserService {
         emailToUser.put(user.getEmail(), user);
 
         // return created user
-        return UserObjectMapper.toUserResponseDto(user);
+        return user;
     }
 
     @Override
-    public UserResponseDto update(int userId, UserRequestDto userRequestDto) {
+    public User update(int userId, UserRequestDto userRequestDto) {
         // getting user from storage
         final User user = requireFindById(userId);
 
@@ -83,28 +82,27 @@ public class UserServiceInMemoryImpl implements UserService {
             emailToUser.remove(user.getEmail());
         }
 
-        return UserObjectMapper.toUserResponseDto(updatedUser);
+        return updatedUser;
     }
 
     @Override
-    public UserResponseDto deleteById(int userId) {
+    public User deleteById(int userId) {
         final User user = requireFindById(userId);
 
         idToUser.remove(user.getId());
         emailToUser.remove(user.getEmail());
 
-        return UserObjectMapper.toUserResponseDto(user);
+        return user;
     }
 
     @Override
-    public UserResponseDto getById(int userId) {
-        final User user = requireFindById(userId);
-        return UserObjectMapper.toUserResponseDto(user);
+    public User getById(int userId) {
+        return requireFindById(userId);
     }
 
     @Override
-    public Collection<UserResponseDto> getAll() {
-        return UserObjectMapper.toUserResponseDto(idToUser.values());
+    public Collection<User> getAll() {
+        return idToUser.values();
     }
 
     private void validateToCreate(UserRequestDto userRequestDto) {

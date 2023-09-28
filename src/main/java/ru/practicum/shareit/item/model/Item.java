@@ -8,8 +8,8 @@ import ru.practicum.shareit.user.model.User;
 @Builder(toBuilder = true)
 public class Item {
     Integer id;
-    User owner;
     String name;
     String description;
     Boolean isAvailable;
+    int ownerId;
 }
