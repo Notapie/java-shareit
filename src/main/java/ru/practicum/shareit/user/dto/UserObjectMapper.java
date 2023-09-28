@@ -12,6 +12,7 @@ public class UserObjectMapper {
                 .email(userRequestDto.getEmail())
                 .build();
     }
+
     public static User fromUserRequestDto(UserRequestDto userRequestDto, int userId) {
         return User.builder()
                 .id(userId)
