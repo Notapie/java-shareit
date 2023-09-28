@@ -104,7 +104,7 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public Collection<UserResponseDto> getAll() {
-        return null;
+        return UserObjectMapper.toUserResponseDto(idToUser.values());
     }
 
     private void validateToCreate(UserRequestDto userRequestDto) {
