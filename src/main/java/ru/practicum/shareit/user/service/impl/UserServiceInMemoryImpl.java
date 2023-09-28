@@ -52,11 +52,8 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public UserResponseDto update(int userId, UserRequestDto userRequestDto) {
-        // check if user exists by id
-        final User user = idToUser.get(userId);
-        if (user == null) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
+        // getting user from storage
+        final User user = requireFindById(userId);
 
         // if updating email, check if new email already exists and update builder
         final User.UserBuilder userBuilder = user.toBuilder();
@@ -91,16 +88,17 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public UserResponseDto deleteById(int userId) {
-        return null;
+        final User user = requireFindById(userId);
+
+        idToUser.remove(user.getId());
+        emailToUser.remove(user.getEmail());
+
+        return UserObjectMapper.toUserResponseDto(user);
     }
 
     @Override
     public UserResponseDto getById(int userId) {
-        // check if user exists by id
-        final User user = idToUser.get(userId);
-        if (user == null) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
+        final User user = requireFindById(userId);
         return UserObjectMapper.toUserResponseDto(user);
     }
 
@@ -120,5 +118,13 @@ public class UserServiceInMemoryImpl implements UserService {
         if (!emailValidator.validate(email)) {
             throw new ValidationException("Invalid email");
         }
+    }
+
+    private User requireFindById(int userId) {
+        final User user = idToUser.get(userId);
+        if (user == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        return user;
     }
 }
