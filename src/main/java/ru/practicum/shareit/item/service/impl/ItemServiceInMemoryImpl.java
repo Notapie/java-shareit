@@ -119,9 +119,12 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 continue;
             }
 
+            final String name = item.getName();
+            final String desc = item.getDescription();
+
             // check match
-            if (item.getName().toLowerCase().contains(query.toLowerCase())
-                    || item.getDescription().toLowerCase().contains(query.toLowerCase())) {
+            if (name != null && name.toLowerCase().contains(query.toLowerCase())
+                    || desc != null && desc.toLowerCase().contains(query.toLowerCase())) {
                 searchResult.add(item);
             }
         }
