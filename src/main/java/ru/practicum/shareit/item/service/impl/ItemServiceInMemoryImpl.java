@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ItemServiceInMemoryImpl implements ItemService {
     private final UserService userService;
     private final Map<Integer, Item> idToItem;
@@ -34,6 +36,8 @@ public class ItemServiceInMemoryImpl implements ItemService {
 
     @Override
     public Item create(ItemRequestDto itemRequestDto, int userId) {
+        log.debug("Create item request from user id = " + userId + ". " + itemRequestDto);
+
         // validate input data
         validateToCreate(itemRequestDto);
 
@@ -49,11 +53,15 @@ public class ItemServiceInMemoryImpl implements ItemService {
         final Map<Integer, Item> idToUserItems = getUserItemsMap(userId);
         idToUserItems.put(item.getId(), item);
 
+        log.debug("Item created." + item);
+
         return item;
     }
 
     @Override
     public Item update(int userId, int itemId, ItemRequestDto itemRequestDto) {
+        log.debug("Update item by id = " + itemId + " request from user id = " + userId + ". " + itemRequestDto);
+
         // get item
         final Item item = requireFindById(itemId);
 
@@ -80,21 +88,29 @@ public class ItemServiceInMemoryImpl implements ItemService {
         idToItem.put(newItem.getId(), newItem);
         getUserItemsMap(userId).put(newItem.getId(), newItem);
 
+        log.debug("Item updated. " + item);
+
         return newItem;
     }
 
     @Override
     public Item getById(int itemId) {
+        log.debug("Get item by id = " + itemId + " request");
+
         return requireFindById(itemId);
     }
 
     @Override
     public Collection<Item> getAllUserItems(int userId) {
+        log.debug("Request to get all user items");
+
         return getUserItemsMap(userId).values();
     }
 
     @Override
     public Collection<Item> search(String query) {
+        log.debug("Request to search available items by query \"" + query + "\"");
+
         if (!StringUtils.hasText(query)) {
             return Collections.emptyList();
         }
@@ -112,6 +128,8 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 searchResult.put(item.getId(), item);
             }
         }
+
+        log.debug("Found " + searchResult.size() + " item(s)");
 
         return searchResult.values();
     }
