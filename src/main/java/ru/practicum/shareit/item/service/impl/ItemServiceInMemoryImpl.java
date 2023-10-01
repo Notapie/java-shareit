@@ -13,10 +13,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -116,7 +113,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         }
 
         // search
-        final Map<Integer, Item> searchResult = new HashMap<>();
+        final List<Item> searchResult = new ArrayList<>();
         for (final Item item : idToItem.values()) {
             if (!item.getIsAvailable()) {
                 continue;
@@ -125,13 +122,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
             // check match
             if (item.getName().toLowerCase().contains(query.toLowerCase())
                     || item.getDescription().toLowerCase().contains(query.toLowerCase())) {
-                searchResult.put(item.getId(), item);
+                searchResult.add(item);
             }
         }
 
         log.debug("Found " + searchResult.size() + " item(s)");
 
-        return searchResult.values();
+        return searchResult;
     }
 
     private void validateToCreate(ItemRequestDto itemRequestDto) {
