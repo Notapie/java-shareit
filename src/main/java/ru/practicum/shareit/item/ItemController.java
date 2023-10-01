@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemObjectMapper;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
@@ -12,7 +11,6 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/items")
-@Slf4j
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
