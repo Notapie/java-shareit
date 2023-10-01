@@ -32,6 +32,7 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public User create(UserRequestDto userRequestDto) {
+        log.debug("Create user request. " + userRequestDto);
         // validate data
         validateToCreate(userRequestDto);
 
@@ -48,11 +49,13 @@ public class UserServiceInMemoryImpl implements UserService {
         emailToUser.put(user.getEmail(), user);
 
         // return created user
+        log.debug("User created. " + user);
         return user;
     }
 
     @Override
     public User update(int userId, UserRequestDto userRequestDto) {
+        log.debug("Update user by id = " + userId + " request. " + userRequestDto);
         // getting user from storage
         final User user = requireFindById(userId);
 
@@ -85,11 +88,15 @@ public class UserServiceInMemoryImpl implements UserService {
             emailToUser.remove(user.getEmail());
         }
 
+        log.debug("User updated. " + user);
+
         return updatedUser;
     }
 
     @Override
     public User deleteById(int userId) {
+        log.debug("Delete user by id = " + userId + " request");
+
         final User user = requireFindById(userId);
 
         idToUser.remove(user.getId());
@@ -100,11 +107,13 @@ public class UserServiceInMemoryImpl implements UserService {
 
     @Override
     public User getById(int userId) {
+        log.debug("Get user by id = " + userId + " request");
         return requireFindById(userId);
     }
 
     @Override
     public Collection<User> getAll() {
+        log.debug("Request to get all users");
         return idToUser.values();
     }
 
