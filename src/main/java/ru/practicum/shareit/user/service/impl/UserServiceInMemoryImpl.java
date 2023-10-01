@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class UserServiceInMemoryImpl implements UserService {
     private final EmailValidator emailValidator;
     private final Map<Integer, User> idToUser;
