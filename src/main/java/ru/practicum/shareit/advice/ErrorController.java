@@ -17,7 +17,7 @@ public class ErrorController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse accessDenied(final ForbiddenException e) {
-        log.debug(e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse(
                 "Access denied", e.getMessage()
         );
@@ -26,7 +26,7 @@ public class ErrorController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse notFound(final NotFoundException e) {
-        log.debug(e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse(
                 "Not found", e.getMessage()
         );
@@ -35,7 +35,7 @@ public class ErrorController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse alreadyExists(final AlreadyExistsException e) {
-        log.debug(e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse(
                 "Already exists", e.getMessage()
         );
@@ -44,7 +44,7 @@ public class ErrorController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationError(final ValidationException e) {
-        log.debug(e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse(
                 "Validation error", e.getMessage()
         );
