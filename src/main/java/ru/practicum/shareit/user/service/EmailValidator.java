@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Pattern;
 
 @Service
-@PropertySource("classpath:application.properties")
 public class EmailValidator {
     private final String emailRegexPattern;
 
