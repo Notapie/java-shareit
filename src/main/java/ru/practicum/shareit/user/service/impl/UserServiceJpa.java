@@ -40,7 +40,7 @@ public class UserServiceJpa implements UserService {
         // save new user
         try {
             final User savedUser = userRepository.save(user);
-            log.debug("User created with. " + savedUser);
+            log.debug("User created. " + savedUser);
 
             return savedUser;
         } catch (Exception e) {
@@ -71,7 +71,9 @@ public class UserServiceJpa implements UserService {
             }
 
             // save and return
-            return userRepository.save(user);
+            final User savedUser = userRepository.save(user);
+            log.debug("User updated. " + savedUser);
+            return savedUser;
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User with id " + userId + " not found");
         } catch (Exception e) {
