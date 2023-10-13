@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
@@ -13,6 +15,8 @@ import ru.practicum.shareit.user.repository.UserJpaRepository;
 import ru.practicum.shareit.user.service.EmailValidator;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.util.Collection;
 
 @Service
@@ -26,6 +30,7 @@ public class UserServiceJpa implements UserService {
     @Override
     public User create(UserRequestDto userRequestDto) {
         log.debug("Create user request. " + userRequestDto);
+
         // validate data
         validateToCreate(userRequestDto);
 
@@ -44,8 +49,34 @@ public class UserServiceJpa implements UserService {
     }
 
     @Override
+    @Transactional
     public User update(int userId, UserRequestDto userRequestDto) {
-        return null;
+        log.debug("Update user by id = " + userId + " request. " + userRequestDto);
+
+        try {
+            // getting user from storage
+            final User user = userRepository.getReferenceById(userId);
+
+            // update email
+            final String newEmail = userRequestDto.getEmail();
+            if (newEmail != null && !newEmail.equals(user.getEmail())) {
+                emailValidate(newEmail);
+                user.setEmail(newEmail);
+            }
+
+            // update name
+            final String newName = userRequestDto.getName();
+            if (newName != null) {
+                user.setName(newName);
+            }
+
+            // save and return
+            return userRepository.save(user);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        } catch (Exception e) {
+            throw new SaveException("Failed to update user with id " + userId, e);
+        }
     }
 
     @Override
