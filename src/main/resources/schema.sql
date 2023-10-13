@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS "item" (
     is_available BOOLEAN
 );
 
+CREATE INDEX IF NOT EXISTS "item_owner_index"
+    ON "item" (owner_id, is_available);
+
 CREATE INDEX IF NOT EXISTS "item_name_index"
     ON "item" (name, is_available);
 
