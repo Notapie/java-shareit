@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
@@ -32,10 +33,14 @@ public class UserServiceJpa implements UserService {
         final User user = UserObjectMapper.fromUserRequestDto(userRequestDto);
 
         // save new user
-        final User savedUser = userRepository.save(user);
-        log.debug("User created with. " + savedUser);
+        try {
+            final User savedUser = userRepository.save(user);
+            log.debug("User created with. " + savedUser);
 
-        return savedUser;
+            return savedUser;
+        } catch (Exception e) {
+            throw new SaveException("Failed to create a new user. " + user, e);
+        }
     }
 
     @Override
