@@ -5,21 +5,22 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    Integer id;
+    private Integer id;
 
     @Column(name = "email", nullable = false, length = 64, unique = true)
-    String email;
+    private String email;
 
     @Column(name = "name", length = 64)
-    String name;
+    private String name;
 }
