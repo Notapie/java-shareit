@@ -48,6 +48,15 @@ public class ErrorController {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse deleteError(final DeleteException e) {
+        log.error(e.getMessage());
+        return new ErrorResponse(
+                "Delete error", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationError(final ValidationException e) {
         log.error(e.getMessage());

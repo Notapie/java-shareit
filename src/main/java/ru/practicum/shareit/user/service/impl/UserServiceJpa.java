@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.DeleteException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.repository.UserJpaRepository;
 import ru.practicum.shareit.user.service.EmailValidator;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.Collection;
 
@@ -37,8 +36,8 @@ public class UserServiceJpa implements UserService {
         // create user from dto
         final User user = UserObjectMapper.fromUserRequestDto(userRequestDto);
 
-        // save new user
         try {
+            // save new user
             final User savedUser = userRepository.save(user);
             log.debug("User created. " + savedUser);
 
@@ -53,10 +52,10 @@ public class UserServiceJpa implements UserService {
     public User update(int userId, UserRequestDto userRequestDto) {
         log.debug("Update user by id = " + userId + " request. " + userRequestDto);
 
-        try {
-            // getting user from storage
-            final User user = userRepository.getReferenceById(userId);
+        // getting user from storage
+        final User user = requireFindById(userId);
 
+        try {
             // update email
             final String newEmail = userRequestDto.getEmail();
             if (newEmail != null && !newEmail.equals(user.getEmail())) {
@@ -74,26 +73,39 @@ public class UserServiceJpa implements UserService {
             final User savedUser = userRepository.save(user);
             log.debug("User updated. " + savedUser);
             return savedUser;
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User with id " + userId + " not found");
         } catch (Exception e) {
             throw new SaveException("Failed to update user with id " + userId, e);
         }
     }
 
     @Override
+    @Transactional
     public User deleteById(int userId) {
-        return null;
+        log.debug("Delete user by id = " + userId + " request");
+
+        // getting user from storage
+        final User user = requireFindById(userId);
+
+        try {
+            userRepository.deleteById(userId);
+            log.debug("User deleted. " + user);
+            return user;
+        } catch (Exception e) {
+            throw new DeleteException("Failed to delete user with id  " + userId);
+        }
     }
 
     @Override
+    @Transactional
     public User getById(int userId) {
-        return null;
+        log.debug("Get user by id = " + userId + " request");
+        return requireFindById(userId);
     }
 
     @Override
     public Collection<User> getAll() {
-        return null;
+        log.debug("Request to get all users");
+        return userRepository.findAll();
     }
 
     private void validateToCreate(UserRequestDto userRequestDto) {
@@ -107,5 +119,12 @@ public class UserServiceJpa implements UserService {
         if (!emailValidator.validate(email)) {
             throw new ValidationException("Invalid email");
         }
+    }
+
+    private User requireFindById(int userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        return userRepository.getReferenceById(userId);
     }
 }
