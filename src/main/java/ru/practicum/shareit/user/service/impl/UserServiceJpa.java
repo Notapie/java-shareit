@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.repository.UserJpaRepository;
 import ru.practicum.shareit.user.service.EmailValidator;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.transaction.Transactional;
 import java.util.Collection;
 
 @Service
@@ -48,7 +47,6 @@ public class UserServiceJpa implements UserService {
     }
 
     @Override
-    @Transactional
     public User update(int userId, UserRequestDto userRequestDto) {
         log.debug("Update user by id = " + userId + " request. " + userRequestDto);
 
@@ -79,7 +77,6 @@ public class UserServiceJpa implements UserService {
     }
 
     @Override
-    @Transactional
     public User deleteById(int userId) {
         log.debug("Delete user by id = " + userId + " request");
 
@@ -96,7 +93,6 @@ public class UserServiceJpa implements UserService {
     }
 
     @Override
-    @Transactional
     public User getById(int userId) {
         log.debug("Get user by id = " + userId + " request");
         return requireFindById(userId);
