@@ -161,7 +161,30 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForOwner(int ownerId, String bookingState) {
-        return null;
+        if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
+            return bookingRepository.findBookingsByItem_Owner_id(ownerId);
+        }
+
+        if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
+            return bookingRepository.findBookingsByItem_Owner_idAndStatus(ownerId, Booking.Status.valueOf(bookingState));
+        }
+
+        if (bookingState.equals("PAST")) {
+            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndEndTimeIsBefore(ownerId,
+                    Booking.Status.APPROVED, LocalDateTime.now());
+        }
+
+        if (bookingState.equals("CURRENT")) {
+            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(ownerId,
+                    Booking.Status.APPROVED, LocalDateTime.now(), LocalDateTime.now());
+        }
+
+        if (bookingState.equals("FUTURE")) {
+            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndStartTimeIsAfter(ownerId,
+                    Booking.Status.APPROVED, LocalDateTime.now());
+        }
+
+        throw new ValidationException("Invalid state");
     }
 
     private void validateToCreate(BookingRequestDto bookingRequestDto) {
