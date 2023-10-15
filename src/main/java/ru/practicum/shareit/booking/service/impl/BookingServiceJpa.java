@@ -36,11 +36,16 @@ public class BookingServiceJpa implements BookingService {
         // validate request
         validateToCreate(bookingRequestDto);
 
-        // get booker
-        final User booker = userService.getById(bookerId);
-
         // get item
         final Item item = itemService.getById(bookingRequestDto.getItemId());
+
+        // check if user is booker
+        if (item.getOwner().getId() == bookerId) {
+            throw new ForbiddenException("The owner cannot be the booker");
+        }
+
+        // get booker
+        final User booker = userService.getById(bookerId);
 
         // check if item available
         if (!item.getIsAvailable()) {
