@@ -37,3 +37,21 @@ CREATE TABLE IF NOT EXISTS "booking" (
     end_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     status booking_status NOT NULL DEFAULT 'WAITING'
 );
+
+CREATE INDEX IF NOT EXISTS "booking_item_id_start_end_index"
+    ON "booking" (item_id, start_time, end_time);
+
+CREATE INDEX IF NOT EXISTS "booking_item_id_end_start_index"
+    ON "booking" (item_id, end_time, start_time);
+
+CREATE INDEX IF NOT EXISTS "booking_item_id_status_start_index"
+    ON "booking" (item_id, status, start_time);
+
+CREATE INDEX IF NOT EXISTS "booking_booker_id_start_end_index"
+    ON "booking" (booker_id, start_time, end_time);
+
+CREATE INDEX IF NOT EXISTS "booking_booker_id_end_start_index"
+    ON "booking" (booker_id, end_time, start_time);
+
+CREATE INDEX IF NOT EXISTS "booking_booker_id_status_start_index"
+    ON "booking" (booker_id, status, start_time);

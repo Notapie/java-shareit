@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
-    @Query("from Booking where item.id = ?1 and endTime >= ?2 and startTime <= ?3 and status = 'APPROVED'")
+    @Query("from Booking where item.id = ?1 and startTime <= ?3 and endTime >= ?2 and status = 'APPROVED'")
     List<Booking> findBookingsBetweenDates(int itemId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // booker searching
@@ -23,13 +23,13 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findBookingsByBooker_IdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // owner searching
-    List<Booking> findBookingsByItem_Owner_idOrderByStartTimeDesc(int bookerId);
+    List<Booking> findBookingsByItem_Owner_idOrderByStartTimeDesc(int ownerId);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(int bookerId, Booking.Status status);
+    List<Booking> findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(int ownerId, Booking.Status status);
 
-    List<Booking> findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(int bookerId, LocalDateTime time);
+    List<Booking> findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(int ownerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime time);
+    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(int ownerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime firstDate, LocalDateTime secondDate);
+    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int ownerId, LocalDateTime firstDate, LocalDateTime secondDate);
 }
