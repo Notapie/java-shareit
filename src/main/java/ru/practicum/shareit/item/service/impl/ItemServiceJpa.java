@@ -122,7 +122,6 @@ public class ItemServiceJpa implements ItemService {
         if (!StringUtils.hasText(itemRequestDto.getDescription())) {
             throw new ValidationException("Item description cannot be null or blank");
         }
-
     }
 
     private Item requireFindById(int itemId) {
