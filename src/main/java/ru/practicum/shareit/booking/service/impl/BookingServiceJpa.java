@@ -76,7 +76,7 @@ public class BookingServiceJpa implements BookingService {
         }
 
         // get booking
-        Booking booking = requireFindById(bookingId);
+        Booking booking = getById(bookingId, userId);
 
         // check that the new status is not equal to the initial one
         if (newStatus == Booking.Status.WAITING) {
@@ -86,6 +86,11 @@ public class BookingServiceJpa implements BookingService {
         // check if it is possible to change the status
         if (booking.getStatus() != Booking.Status.WAITING) {
             throw new ForbiddenException("The " + booking.getStatus().name() + " status cannot be changed");
+        }
+
+        // check if there is an available time for booking
+        if (!isTimeRangeAvailableToBook(booking.getStartTime(), booking.getEndTime())) {
+            throw new ForbiddenException("It is not possible to book an item for this time range");
         }
 
         // only the booker can cancel his booking
@@ -113,7 +118,16 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Booking getById(int bookingId, int userId) {
-        return null;
+        // get booking
+        final Booking booking = requireFindById(userId);
+
+        // check if the user is booker or owner
+        if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
+            throw new ForbiddenException("Only the owner of the item and the booker have access to this booking");
+        }
+
+        // return the booking
+        return booking;
     }
 
     @Override
@@ -157,7 +171,7 @@ public class BookingServiceJpa implements BookingService {
         return getBookingsBetween(startTime, endTime).isEmpty();
     }
 
-    public Booking requireFindById(int bookingId) {
+    private Booking requireFindById(int bookingId) {
         if (!bookingRepository.existsById(bookingId)) {
             throw new NotFoundException("Booking with id " + bookingId + " not found");
         }
