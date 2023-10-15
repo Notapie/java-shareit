@@ -45,7 +45,10 @@ public class BookingServiceJpa implements BookingService {
             throw new ForbiddenException("Cannot to book an unavailable item");
         }
 
-        // TODO: check if there is an available time for booking
+        // check if there is an available time for booking
+        if (!isTimeRangeAvailableToBook(bookingRequestDto.getStart(), bookingRequestDto.getEnd())) {
+            throw new ForbiddenException("It is not possible to book an item for this time range");
+        }
 
         // create booking entity
         final Booking booking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, item, booker);
@@ -102,5 +105,13 @@ public class BookingServiceJpa implements BookingService {
                 || bookingRequestDto.getEnd().isEqual(bookingRequestDto.getStart())) {
             throw new ValidationException("The booking start time cannot be later or equal to the end time");
         }
+    }
+
+    private Collection<Booking> getBookingsBetween(LocalDateTime firstDate, LocalDateTime secondDate) {
+        return bookingRepository.findBookingsBetweenDates(firstDate, secondDate);
+    }
+
+    private boolean isTimeRangeAvailableToBook(LocalDateTime startTime, LocalDateTime endTime) {
+        return getBookingsBetween(startTime, endTime).isEmpty();
     }
 }
