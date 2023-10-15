@@ -37,7 +37,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.WAITING;
+    private Status status;
 
     public enum Status {
         WAITING,

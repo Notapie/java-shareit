@@ -30,7 +30,7 @@ public class BookingObjectMapper {
                 .build();
     }
 
-    public static Collection<BookingResponseDto> bookingResponseDto(Collection<Booking> bookings) {
+    public static Collection<BookingResponseDto> toBookingResponseDto(Collection<Booking> bookings) {
         return bookings.stream()
                 .map(BookingObjectMapper::toBookingResponseDto)
                 .collect(Collectors.toList());

@@ -12,34 +12,24 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findBookingsBetweenDates(LocalDateTime firstDate, LocalDateTime secondDate);
 
     // booker searching
-    List<Booking> findBookingsByBooker_Id(int bookerId);
+    List<Booking> findBookingsByBooker_IdOrderByStartTimeDesc(int bookerId);
 
-    List<Booking> findBookingsByBooker_IdAndStatus(int bookerId, Booking.Status status);
+    List<Booking> findBookingsByBooker_IdAndStatusOrderByStartTimeDesc(int bookerId, Booking.Status status);
 
-    List<Booking> findBookingsByBooker_IdAndStatusAndEndTimeIsBefore(int bookerId, Booking.Status status,
-                                                                     LocalDateTime time);
+    List<Booking> findBookingsByBooker_IdAndEndTimeIsBeforeOrderByStartTimeDesc(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByBooker_IdAndStatusAndStartTimeIsAfter(int bookerId, Booking.Status status,
-                                                                      LocalDateTime time);
+    List<Booking> findBookingsByBooker_IdAndStartTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByBooker_IdAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(int bookerId,
-                                                                                        Booking.Status status,
-                                                                                        LocalDateTime firstDate,
-                                                                                        LocalDateTime secondDate);
+    List<Booking> findBookingsByBooker_IdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // owner searching
-    List<Booking> findBookingsByItem_Owner_id(int bookerId);
+    List<Booking> findBookingsByItem_Owner_idOrderByStartTimeDesc(int bookerId);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatus(int bookerId, Booking.Status status);
+    List<Booking> findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(int bookerId, Booking.Status status);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatusAndEndTimeIsBefore(int bookerId, Booking.Status status,
-                                                                     LocalDateTime time);
+    List<Booking> findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatusAndStartTimeIsAfter(int bookerId, Booking.Status status,
-                                                                      LocalDateTime time);
+    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(int bookerId,
-                                                                                        Booking.Status status,
-                                                                                        LocalDateTime firstDate,
-                                                                                        LocalDateTime secondDate);
+    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime firstDate, LocalDateTime secondDate);
 }

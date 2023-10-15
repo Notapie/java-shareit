@@ -54,6 +54,7 @@ public class BookingServiceJpa implements BookingService {
 
         // create booking entity
         final Booking booking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, item, booker);
+        booking.setStatus(Booking.Status.WAITING);
 
         try {
             // save new booking
@@ -66,16 +67,7 @@ public class BookingServiceJpa implements BookingService {
         }
     }
 
-    @Override
-    public Booking changeStatus(int bookingId, int userId, String newStatusStr) {
-        // get new status
-        final Booking.Status newStatus;
-        try {
-            newStatus = Booking.Status.valueOf(newStatusStr);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Invalid status");
-        }
-
+    private Booking changeStatus(int bookingId, int userId, Booking.Status newStatus) {
         // get booking
         Booking booking = getById(bookingId, userId);
 
@@ -118,9 +110,14 @@ public class BookingServiceJpa implements BookingService {
     }
 
     @Override
+    public Booking approve(int bookingId, int ownerId, boolean isApproved) {
+        return changeStatus(bookingId, ownerId, isApproved ? Booking.Status.APPROVED : Booking.Status.REJECTED);
+    }
+
+    @Override
     public Booking getById(int bookingId, int userId) {
         // get booking
-        final Booking booking = requireFindById(userId);
+        final Booking booking = requireFindById(bookingId);
 
         // check if the user is booker or owner
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
@@ -133,27 +130,28 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForBooker(int bookerId, String bookingState) {
+        userService.getById(bookerId);
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByBooker_Id(bookerId);
+            return bookingRepository.findBookingsByBooker_IdOrderByStartTimeDesc(bookerId);
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByBooker_IdAndStatus(bookerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByBooker_IdAndStatusOrderByStartTimeDesc(bookerId, Booking.Status.valueOf(bookingState));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByBooker_IdAndStatusAndEndTimeIsBefore(bookerId,
-                    Booking.Status.APPROVED, LocalDateTime.now());
+            return bookingRepository.findBookingsByBooker_IdAndEndTimeIsBeforeOrderByStartTimeDesc(bookerId,
+                    LocalDateTime.now());
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findBookingsByBooker_IdAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(bookerId,
-                    Booking.Status.APPROVED, LocalDateTime.now(), LocalDateTime.now());
+            return bookingRepository.findBookingsByBooker_IdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(bookerId,
+                    LocalDateTime.now(), LocalDateTime.now());
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByBooker_IdAndStatusAndStartTimeIsAfter(bookerId,
-                    Booking.Status.APPROVED, LocalDateTime.now());
+            return bookingRepository.findBookingsByBooker_IdAndStartTimeIsAfterOrderByStartTimeDesc(bookerId,
+                    LocalDateTime.now());
         }
 
         throw new ValidationException("Invalid state");
@@ -161,27 +159,29 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForOwner(int ownerId, String bookingState) {
+        userService.getById(ownerId);
+
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByItem_Owner_id(ownerId);
+            return bookingRepository.findBookingsByItem_Owner_idOrderByStartTimeDesc(ownerId);
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStatus(ownerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(ownerId, Booking.Status.valueOf(bookingState));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndEndTimeIsBefore(ownerId,
-                    Booking.Status.APPROVED, LocalDateTime.now());
+            return bookingRepository.findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(ownerId,
+                    LocalDateTime.now());
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(ownerId,
-                    Booking.Status.APPROVED, LocalDateTime.now(), LocalDateTime.now());
+            return bookingRepository.findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(ownerId,
+                    LocalDateTime.now(), LocalDateTime.now());
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStatusAndStartTimeIsAfter(ownerId,
-                    Booking.Status.APPROVED, LocalDateTime.now());
+            return bookingRepository.findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(ownerId,
+                    LocalDateTime.now());
         }
 
         throw new ValidationException("Invalid state");
