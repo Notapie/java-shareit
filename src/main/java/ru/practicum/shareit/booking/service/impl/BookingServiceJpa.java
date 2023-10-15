@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.dto.BookingObjectMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -132,7 +133,30 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForBooker(int bookerId, String bookingState) {
-        return null;
+        if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
+            return bookingRepository.findBookingsByBooker_Id(bookerId);
+        }
+
+        if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
+            return bookingRepository.findBookingsByBooker_IdAndStatus(bookerId, Booking.Status.valueOf(bookingState));
+        }
+
+        if (bookingState.equals("PAST")) {
+            return bookingRepository.findBookingsByBooker_IdAndStatusAndEndTimeIsBefore(bookerId,
+                    Booking.Status.APPROVED, LocalDateTime.now());
+        }
+
+        if (bookingState.equals("CURRENT")) {
+            return bookingRepository.findBookingsByBooker_IdAndStatusAndStartTimeIsBeforeAndEndTimeIsAfter(bookerId,
+                    Booking.Status.APPROVED, LocalDateTime.now(), LocalDateTime.now());
+        }
+
+        if (bookingState.equals("FUTURE")) {
+            return bookingRepository.findBookingsByBooker_IdAndStatusAndStartTimeIsAfter(bookerId,
+                    Booking.Status.APPROVED, LocalDateTime.now());
+        }
+
+        throw new ValidationException("Invalid state");
     }
 
     @Override
