@@ -14,7 +14,7 @@ public class BookingObjectMapper {
         return Booking.builder()
                 .item(item)
                 .booker(booker)
-                .beginTime(bookingRequestDto.getStart())
+                .startTime(bookingRequestDto.getStart())
                 .endTime(bookingRequestDto.getEnd())
                 .build();
     }
@@ -24,7 +24,7 @@ public class BookingObjectMapper {
                 .id(booking.getId())
                 .item(ItemObjectMapper.toItemResponseDto(booking.getItem()))
                 .booker(UserObjectMapper.toUserResponseDto(booking.getBooker()))
-                .start(booking.getBeginTime())
+                .start(booking.getStartTime())
                 .end(booking.getEndTime())
                 .status(booking.getStatus())
                 .build();
