@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class BookingRequestDto {
-    Integer item_id;
+    Integer itemId;
 
     LocalDateTime start;
     LocalDateTime end;
