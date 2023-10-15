@@ -18,6 +18,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @Service
 @Slf4j
@@ -96,12 +97,17 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Collection<Item> getAllUserItems(int userId) {
+        log.debug("Request to get all user " + userId + " items");
         return itemRepository.findItemsByOwnerIdIs(userId);
     }
 
     @Override
     public Collection<Item> search(String query) {
-        return null;
+        log.debug("Request to search available items by query \"" + query + "\"");
+        if (!StringUtils.hasText(query)) {
+            return Collections.emptyList();
+        }
+        return itemRepository.searchItemsByQuery(query);
     }
 
     private void validateToCreate(ItemRequestDto itemRequestDto) {
