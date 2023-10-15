@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
@@ -65,8 +66,49 @@ public class BookingServiceJpa implements BookingService {
     }
 
     @Override
-    public Booking changeStatus(int bookingId, int ownerId, String newStatus) {
-        return null;
+    public Booking changeStatus(int bookingId, int userId, String newStatusStr) {
+        // get new status
+        final Booking.Status newStatus;
+        try {
+            newStatus = Booking.Status.valueOf(newStatusStr);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid status");
+        }
+
+        // get booking
+        Booking booking = requireFindById(bookingId);
+
+        // check that the new status is not equal to the initial one
+        if (newStatus == Booking.Status.WAITING) {
+            throw new ForbiddenException("It is not possible to change the status to " + Booking.Status.WAITING.name());
+        }
+
+        // check if it is possible to change the status
+        if (booking.getStatus() != Booking.Status.WAITING) {
+            throw new ForbiddenException("The " + booking.getStatus().name() + " status cannot be changed");
+        }
+
+        // only the booker can cancel his booking
+        if (newStatus == Booking.Status.CANCELED && booking.getBooker().getId() != userId) {
+            throw new ForbiddenException("Only the booker can cancel the booking");
+        }
+
+        // only the item owner can approve or reject booking
+        if (booking.getItem().getOwner().getId() != userId) {
+            throw new ForbiddenException("Only the owner of the item can change the booking status");
+        }
+
+        // change status and save
+        booking.setStatus(newStatus);
+
+        try {
+            final Booking savedBooking = bookingRepository.save(booking);
+            log.debug("Booking updated. " + savedBooking);
+
+            return savedBooking;
+        } catch (Exception e) {
+            throw new SaveException("Failed to update a booking status. " + booking, e);
+        }
     }
 
     @Override
@@ -113,5 +155,12 @@ public class BookingServiceJpa implements BookingService {
 
     private boolean isTimeRangeAvailableToBook(LocalDateTime startTime, LocalDateTime endTime) {
         return getBookingsBetween(startTime, endTime).isEmpty();
+    }
+
+    public Booking requireFindById(int bookingId) {
+        if (!bookingRepository.existsById(bookingId)) {
+            throw new NotFoundException("Booking with id " + bookingId + " not found");
+        }
+        return bookingRepository.getReferenceById(bookingId);
     }
 }
