@@ -96,7 +96,7 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Collection<Item> getAllUserItems(int userId) {
-        return null;
+        return itemRepository.findItemsByOwnerIdIs(userId);
     }
 
     @Override
