@@ -90,7 +90,8 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Item getById(int itemId) {
-        return null;
+        log.debug("Get item by id = " + itemId + " request");
+        return requireFindById(itemId);
     }
 
     @Override
