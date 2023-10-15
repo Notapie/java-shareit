@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
-    @Query("from Booking where endTime >= ?1 and startTime <= ?2 and status = 'APPROVED'")
-    List<Booking> findBookingsBetweenDates(LocalDateTime firstDate, LocalDateTime secondDate);
+    @Query("from Booking where item.id = ?1 and endTime >= ?2 and startTime <= ?3 and status = 'APPROVED'")
+    List<Booking> findBookingsBetweenDates(int itemId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // booker searching
     List<Booking> findBookingsByBooker_IdOrderByStartTimeDesc(int bookerId);

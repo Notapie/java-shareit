@@ -53,7 +53,7 @@ public class BookingServiceJpa implements BookingService {
         }
 
         // check if there is an available time for booking
-        if (!isTimeRangeAvailableToBook(bookingRequestDto.getStart(), bookingRequestDto.getEnd())) {
+        if (!isTimeRangeAvailableToBook(item.getId(), bookingRequestDto.getStart(), bookingRequestDto.getEnd())) {
             throw new ForbiddenException("It is not possible to book an item for this time range");
         }
 
@@ -87,7 +87,7 @@ public class BookingServiceJpa implements BookingService {
         }
 
         // check if there is an available time for booking
-        if (!isTimeRangeAvailableToBook(booking.getStartTime(), booking.getEndTime())) {
+        if (!isTimeRangeAvailableToBook(booking.getItem().getId(), booking.getStartTime(), booking.getEndTime())) {
             throw new ForbiddenException("It is not possible to book an item for this time range");
         }
 
@@ -215,12 +215,12 @@ public class BookingServiceJpa implements BookingService {
         }
     }
 
-    private Collection<Booking> getBookingsBetween(LocalDateTime firstDate, LocalDateTime secondDate) {
-        return bookingRepository.findBookingsBetweenDates(firstDate, secondDate);
+    private Collection<Booking> getBookingsBetween(int itemId, LocalDateTime firstDate, LocalDateTime secondDate) {
+        return bookingRepository.findBookingsBetweenDates(itemId, firstDate, secondDate);
     }
 
-    private boolean isTimeRangeAvailableToBook(LocalDateTime startTime, LocalDateTime endTime) {
-        return getBookingsBetween(startTime, endTime).isEmpty();
+    private boolean isTimeRangeAvailableToBook(int itemId, LocalDateTime startTime, LocalDateTime endTime) {
+        return getBookingsBetween(itemId, startTime, endTime).isEmpty();
     }
 
     private Booking requireFindById(int bookingId) {
