@@ -4,11 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingObjectMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -19,10 +26,39 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingServiceJpa implements BookingService {
     private final BookingJpaRepository bookingRepository;
+    private final UserService userService;
+    private final ItemService itemService;
 
     @Override
     public Booking create(BookingRequestDto bookingRequestDto, int bookerId) {
-        return null;
+        // validate request
+        validateToCreate(bookingRequestDto);
+
+        // get booker
+        final User booker = userService.getById(bookerId);
+
+        // get item
+        final Item item = itemService.getById(bookingRequestDto.getItemId());
+
+        // check if item available
+        if (!item.getIsAvailable()) {
+            throw new ForbiddenException("Cannot to book an unavailable item");
+        }
+
+        // TODO: check if there is an available time for booking
+
+        // create booking entity
+        final Booking booking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, item, booker);
+
+        try {
+            // save new booking
+            final Booking savedBooking = bookingRepository.save(booking);
+            log.debug("Booking created. " + savedBooking);
+
+            return savedBooking;
+        } catch (Exception e) {
+            throw new SaveException("Failed to create a new booking. " + booking, e);
+        }
     }
 
     @Override
