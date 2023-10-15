@@ -42,7 +42,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         final User owner = userService.getById(userId);
 
         // get new Item object
-        final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, userId, itemCounter++);
+        final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, owner);
 
         // save new item
         idToItem.put(item.getId(), item);
@@ -63,9 +63,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         final Item item = requireFindById(itemId);
 
         // check if user is owner
-        if (!item.getOwnerId().equals(userId)) {
-            throw new ForbiddenException("User with id " + userId + " is not the item owner");
-        }
+
 
         // build new item
         final Item.ItemBuilder itemBuilder = item.toBuilder();

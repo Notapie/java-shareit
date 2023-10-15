@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "item" (
     owner_id INTEGER REFERENCES "user" (id) ON DELETE CASCADE,
     name VARCHAR(64),
     description VARCHAR(1024),
-    is_available BOOLEAN
+    is_available BOOLEAN NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS "item_owner_index"

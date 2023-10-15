@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -14,13 +15,12 @@ public class ItemObjectMapper {
                 .build();
     }
 
-    public static Item fromItemRequestDto(ItemRequestDto itemRequestDto, int ownerId, int itemId) {
+    public static Item fromItemRequestDto(ItemRequestDto itemRequestDto, User owner) {
         return Item.builder()
-                .id(itemId)
+                .owner(owner)
                 .name(itemRequestDto.getName())
                 .description(itemRequestDto.getDescription())
                 .isAvailable(itemRequestDto.getAvailable())
-                .ownerId(ownerId)
                 .build();
     }
 
