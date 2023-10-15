@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -28,7 +29,7 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Item create(ItemRequestDto itemRequestDto, int userId) {
-        log.debug("Create user request. " + itemRequestDto);
+        log.debug("Create item request. " + itemRequestDto);
 
         // validate input data
         validateToCreate(itemRequestDto);
@@ -51,7 +52,40 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Item update(int userId, int itemId, ItemRequestDto itemRequestDto) {
-        return null;
+        log.debug("Update item by id = " + itemId + " request from user id = " + userId + ". " + itemRequestDto);
+
+        // get item
+        Item item = requireFindById(itemId);
+
+        // check if user is owner
+        if (item.getOwner().getId() != userId) {
+            throw new ForbiddenException("User with id " + userId + " is not the item owner");
+        }
+
+        // update item columns
+        final String name = itemRequestDto.getName();
+        if (StringUtils.hasText(name)) {
+            item.setName(name);
+        }
+
+        final String description = itemRequestDto.getDescription();
+        if (StringUtils.hasText(description)) {
+            item.setDescription(description);
+        }
+
+        final Boolean isAvailable = itemRequestDto.getAvailable();
+        if (isAvailable != null) {
+            item.setIsAvailable(isAvailable);
+        }
+
+        // save updated item
+        try {
+            Item savedItem = itemRepository.save(item);
+            log.debug("Item updated." + item);
+            return savedItem;
+        } catch (Exception e) {
+            throw new SaveException("Failed to save updated item" + item, e);
+        }
     }
 
     @Override
