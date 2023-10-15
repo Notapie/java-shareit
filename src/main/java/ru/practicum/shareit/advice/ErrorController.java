@@ -65,4 +65,22 @@ public class ErrorController {
                 "Validation error", e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse unknownError(final UnknownStateException e) {
+        log.error(e.getMessage());
+        return new ErrorResponse(
+                "Unknown state: UNSUPPORTED_STATUS", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse unavailableError(final UnavailableException e) {
+        log.error(e.getMessage());
+        return new ErrorResponse(
+                "Unavailable", e.getMessage()
+        );
+    }
 }

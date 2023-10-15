@@ -10,10 +10,7 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.ForbiddenException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.SaveException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -41,7 +38,7 @@ public class BookingServiceJpa implements BookingService {
 
         // check if user is booker
         if (item.getOwner().getId() == bookerId) {
-            throw new ForbiddenException("The owner cannot be the booker");
+            throw new NotFoundException("Booking not found");
         }
 
         // get booker
@@ -49,7 +46,7 @@ public class BookingServiceJpa implements BookingService {
 
         // check if item available
         if (!item.getIsAvailable()) {
-            throw new ForbiddenException("Cannot to book an unavailable item");
+            throw new UnavailableException("Cannot to book an unavailable item");
         }
 
         // check if there is an available time for booking
@@ -83,7 +80,7 @@ public class BookingServiceJpa implements BookingService {
 
         // check if it is possible to change the status
         if (booking.getStatus() != Booking.Status.WAITING) {
-            throw new ForbiddenException("The " + booking.getStatus().name() + " status cannot be changed");
+            throw new UnavailableException("The " + booking.getStatus().name() + " status cannot be changed");
         }
 
         // check if there is an available time for booking
@@ -93,12 +90,12 @@ public class BookingServiceJpa implements BookingService {
 
         // only the booker can cancel his booking
         if (newStatus == Booking.Status.CANCELED && booking.getBooker().getId() != userId) {
-            throw new ForbiddenException("Only the booker can cancel the booking");
+            throw new NotFoundException("Booking not found");
         }
 
         // only the item owner can approve or reject booking
         if (booking.getItem().getOwner().getId() != userId) {
-            throw new ForbiddenException("Only the owner of the item can change the booking status");
+            throw new NotFoundException("Booking not found");
         }
 
         // change status and save
@@ -126,7 +123,7 @@ public class BookingServiceJpa implements BookingService {
 
         // check if the user is booker or owner
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
-            throw new ForbiddenException("Only the owner of the item and the booker have access to this booking");
+            throw new NotFoundException("Booking not found");
         }
 
         // return the booking
@@ -159,7 +156,7 @@ public class BookingServiceJpa implements BookingService {
                     LocalDateTime.now());
         }
 
-        throw new ValidationException("Invalid state");
+        throw new UnknownStateException("Invalid state");
     }
 
     @Override
@@ -189,7 +186,7 @@ public class BookingServiceJpa implements BookingService {
                     LocalDateTime.now());
         }
 
-        throw new ValidationException("Invalid state");
+        throw new UnknownStateException("Invalid state");
     }
 
     private void validateToCreate(BookingRequestDto bookingRequestDto) {
