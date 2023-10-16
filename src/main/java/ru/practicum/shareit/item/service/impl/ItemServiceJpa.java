@@ -5,19 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.service.impl.BookingJpaUtil;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemObjectMapper;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemResponseExtendedDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -27,6 +29,7 @@ public class ItemServiceJpa implements ItemService {
     private final ItemJpaRepository itemRepository;
     private final ItemJpaUtil itemUtil;
     private final UserJpaUtil userUtil;
+    private final BookingJpaUtil bookingUtil;
 
     @Override
     public Item create(ItemRequestDto itemRequestDto, int userId) {
@@ -90,15 +93,57 @@ public class ItemServiceJpa implements ItemService {
     }
 
     @Override
-    public Item getById(int itemId) {
+    public ItemResponseExtendedDto getById(int itemId, int userId) {
         log.debug("Get item by id = " + itemId + " request");
-        return itemUtil.requireFindById(itemId);
+        final Item item = itemUtil.requireFindById(itemId);
+
+        // if user is not the owner just return the item
+        if (item.getOwner().getId() != userId) {
+            return ItemObjectMapper.toItemResponseExtendedDto(item);
+        }
+
+        // get last item booking
+        final Booking lastBooking = bookingUtil.getLastItemBooking(itemId);
+
+        // get nex item booking
+        final Booking nextBooking = bookingUtil.getNextItemBooking(itemId);
+
+        // return item with bookings
+        return ItemObjectMapper.toItemResponseExtendedDto(item, lastBooking, nextBooking);
     }
 
     @Override
-    public Collection<Item> getAllUserItems(int userId) {
+    public Collection<ItemResponseExtendedDto> getAllUserItems(int userId) {
         log.debug("Request to get all user " + userId + " items");
-        return itemRepository.findItemsByOwnerIdIs(userId);
+        List<Item> items = itemRepository.findItemsByOwnerIdIs(userId);
+
+        // get item extended DTOs
+        final Map<Integer, ItemResponseExtendedDto> itemIdToItemExtDto = new HashMap<>();
+        for (Item item : items) {
+            itemIdToItemExtDto.put(item.getId(), ItemObjectMapper.toItemResponseExtendedDto(item));
+        }
+
+        // get last bookings
+        List<Booking> lastBookings = bookingUtil.getLastItemsBookings(itemIdToItemExtDto.keySet());
+
+        // get next bookings
+        List<Booking> nextBookings = bookingUtil.getNextItemsBookings(itemIdToItemExtDto.keySet());
+
+        for (int i = 0; i < Integer.max(lastBookings.size(), nextBookings.size()); ++i) {
+            if (i < lastBookings.size()) {
+                Booking lastBooking = lastBookings.get(i);
+                ItemResponseExtendedDto dto = itemIdToItemExtDto.get(lastBooking.getItem().getId());
+                dto.setLastBooking(ItemObjectMapper.toBookingShortResponseDto(lastBooking));
+            }
+
+            if (i < nextBookings.size()) {
+                Booking nextBooking = nextBookings.get(i);
+                ItemResponseExtendedDto dto = itemIdToItemExtDto.get(nextBooking.getItem().getId());
+                dto.setLastBooking(ItemObjectMapper.toBookingShortResponseDto(nextBooking));
+            }
+        }
+
+        return itemIdToItemExtDto.values();
     }
 
     @Override

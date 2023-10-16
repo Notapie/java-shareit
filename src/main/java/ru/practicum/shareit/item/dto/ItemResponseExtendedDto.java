@@ -1,10 +1,9 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
-@Value
-@Builder
+@Data
+@Builder(toBuilder = true)
 public class ItemResponseExtendedDto {
     Integer id;
     String name;
