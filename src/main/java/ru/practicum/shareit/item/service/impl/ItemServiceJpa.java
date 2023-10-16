@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.ForbiddenException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemObjectMapper;
@@ -15,7 +14,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +25,8 @@ import java.util.Collections;
 @Primary
 public class ItemServiceJpa implements ItemService {
     private final ItemJpaRepository itemRepository;
-    private final UserService userService;
+    private final ItemJpaUtil itemUtil;
+    private final UserJpaUtil userUtil;
 
     @Override
     public Item create(ItemRequestDto itemRequestDto, int userId) {
@@ -36,7 +36,7 @@ public class ItemServiceJpa implements ItemService {
         validateToCreate(itemRequestDto);
 
         // find owner
-        final User owner = userService.getById(userId);
+        final User owner = userUtil.requireFindById(userId);
 
         // build new item entity
         final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, owner);
@@ -56,7 +56,7 @@ public class ItemServiceJpa implements ItemService {
         log.debug("Update item by id = " + itemId + " request from user id = " + userId + ". " + itemRequestDto);
 
         // get item
-        Item item = requireFindById(itemId);
+        Item item = itemUtil.requireFindById(itemId);
 
         // check if user is owner
         if (item.getOwner().getId() != userId) {
@@ -92,7 +92,7 @@ public class ItemServiceJpa implements ItemService {
     @Override
     public Item getById(int itemId) {
         log.debug("Get item by id = " + itemId + " request");
-        return requireFindById(itemId);
+        return itemUtil.requireFindById(itemId);
     }
 
     @Override
@@ -122,12 +122,5 @@ public class ItemServiceJpa implements ItemService {
         if (!StringUtils.hasText(itemRequestDto.getDescription())) {
             throw new ValidationException("Item description cannot be null or blank");
         }
-    }
-
-    private Item requireFindById(int itemId) {
-        if (!itemRepository.existsById(itemId)) {
-            throw new NotFoundException("Item with id " + itemId + " not found");
-        }
-        return itemRepository.getReferenceById(itemId);
     }
 }

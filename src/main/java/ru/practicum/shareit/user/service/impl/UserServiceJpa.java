@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DeleteException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
@@ -22,8 +21,9 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @Primary
 public class UserServiceJpa implements UserService {
-    private final EmailValidator emailValidator;
     private final UserJpaRepository userRepository;
+    private final UserJpaUtil userUtil;
+    private final EmailValidator emailValidator;
 
     @Override
     public User create(UserRequestDto userRequestDto) {
@@ -51,7 +51,7 @@ public class UserServiceJpa implements UserService {
         log.debug("Update user by id = " + userId + " request. " + userRequestDto);
 
         // getting user from storage
-        final User user = requireFindById(userId);
+        final User user = userUtil.requireFindById(userId);
 
         try {
             // update email
@@ -81,7 +81,7 @@ public class UserServiceJpa implements UserService {
         log.debug("Delete user by id = " + userId + " request");
 
         // getting user from storage
-        final User user = requireFindById(userId);
+        final User user = userUtil.requireFindById(userId);
 
         try {
             userRepository.deleteById(userId);
@@ -95,7 +95,7 @@ public class UserServiceJpa implements UserService {
     @Override
     public User getById(int userId) {
         log.debug("Get user by id = " + userId + " request");
-        return requireFindById(userId);
+        return userUtil.requireFindById(userId);
     }
 
     @Override
@@ -115,12 +115,5 @@ public class UserServiceJpa implements UserService {
         if (!emailValidator.validate(email)) {
             throw new ValidationException("Invalid email");
         }
-    }
-
-    private User requireFindById(int userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
-        return userRepository.getReferenceById(userId);
     }
 }

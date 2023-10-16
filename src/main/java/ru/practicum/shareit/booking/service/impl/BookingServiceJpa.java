@@ -12,9 +12,9 @@ import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.impl.ItemJpaUtil;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -25,8 +25,9 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingServiceJpa implements BookingService {
     private final BookingJpaRepository bookingRepository;
-    private final UserService userService;
-    private final ItemService itemService;
+    private final BookingJpaUtil bookingUtil;
+    private final UserJpaUtil userUtil;
+    private final ItemJpaUtil itemUtil;
 
     @Override
     public Booking create(BookingRequestDto bookingRequestDto, int bookerId) {
@@ -34,7 +35,7 @@ public class BookingServiceJpa implements BookingService {
         validateToCreate(bookingRequestDto);
 
         // get item
-        final Item item = itemService.getById(bookingRequestDto.getItemId());
+        final Item item = itemUtil.requireFindById(bookingRequestDto.getItemId());
 
         // check if user is booker
         if (item.getOwner().getId() == bookerId) {
@@ -42,7 +43,7 @@ public class BookingServiceJpa implements BookingService {
         }
 
         // get booker
-        final User booker = userService.getById(bookerId);
+        final User booker = userUtil.requireFindById(bookerId);
 
         // check if item available
         if (!item.getIsAvailable()) {
@@ -119,7 +120,7 @@ public class BookingServiceJpa implements BookingService {
     @Override
     public Booking getById(int bookingId, int userId) {
         // get booking
-        final Booking booking = requireFindById(bookingId);
+        final Booking booking = bookingUtil.requireFindById(bookingId);
 
         // check if the user is booker or owner
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
@@ -132,7 +133,8 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForBooker(int bookerId, String bookingState) {
-        userService.getById(bookerId);
+        userUtil.assertExists(bookerId);
+
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
             return bookingRepository.findBookingsByBooker_IdOrderByStartTimeDesc(bookerId);
         }
@@ -161,7 +163,7 @@ public class BookingServiceJpa implements BookingService {
 
     @Override
     public Collection<Booking> getAllForOwner(int ownerId, String bookingState) {
-        userService.getById(ownerId);
+        userUtil.assertExists(ownerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
             return bookingRepository.findBookingsByItem_Owner_idOrderByStartTimeDesc(ownerId);
@@ -218,12 +220,5 @@ public class BookingServiceJpa implements BookingService {
 
     private boolean isTimeRangeAvailableToBook(int itemId, LocalDateTime startTime, LocalDateTime endTime) {
         return getBookingsBetween(itemId, startTime, endTime).isEmpty();
-    }
-
-    private Booking requireFindById(int bookingId) {
-        if (!bookingRepository.existsById(bookingId)) {
-            throw new NotFoundException("Booking with id " + bookingId + " not found");
-        }
-        return bookingRepository.getReferenceById(bookingId);
     }
 }
