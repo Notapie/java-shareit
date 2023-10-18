@@ -36,14 +36,14 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int ownerId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // item last bookings
-    @Query("from Booking where item.id in ?1 and status = 'APPROVED' and startTime <= ?2 group by item.id order by startTime desc")
+    @Query(value = "SELECT DISTINCT ON (item_id) * FROM \"booking\" WHERE item_id IN ?1 AND status = 'APPROVED' AND start_time <= ?2 ORDER BY item_id, start_time DESC", nativeQuery = true)
     List<Booking> findLastBookingsByItemIds(Collection<Integer> itemIds, LocalDateTime currentTime);
 
     @Query("from Booking where item.id = ?1 and status = 'APPROVED' and startTime <= ?2 order by startTime desc")
     List<Booking> findLastBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
 
     // item next bookings
-    @Query("from Booking where item.id in ?1 and status = 'APPROVED' and startTime > ?2 group by item.id order by startTime asc")
+    @Query(value = "SELECT DISTINCT ON (item_id) * FROM \"booking\" WHERE item_id IN ?1 AND status = 'APPROVED' AND start_time > ?2 ORDER BY item_id, start_time", nativeQuery = true)
     List<Booking> findNextBookingsByItemIds(Collection<Integer> itemIds, LocalDateTime currentTime);
 
     @Query("from Booking where item.id in ?1 and status = 'APPROVED' and startTime > ?2 order by startTime asc")
