@@ -14,6 +14,7 @@ public class CommentObjectMapper {
         return Comment.builder()
                 .author(author)
                 .item(item)
+                .text(commentRequestDto.getText())
                 .creationTime(createdAt)
                 .build();
     }

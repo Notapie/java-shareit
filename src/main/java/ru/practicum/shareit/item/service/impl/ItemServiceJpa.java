@@ -96,6 +96,10 @@ public class ItemServiceJpa implements ItemService {
 
     @Override
     public Comment addComment(CommentRequestDto commentRequestDto, int itemId, int authorId) {
+        log.debug("Create comment from user " + authorId + " for item " + itemId + " request. " + commentRequestDto);
+        // validate request dto
+        validateToCreate(commentRequestDto);
+
         // get item
         final Item item = itemUtil.requireFindById(itemId);
 
@@ -130,9 +134,12 @@ public class ItemServiceJpa implements ItemService {
         log.debug("Get item by id = " + itemId + " request");
         final Item item = itemUtil.requireFindById(itemId);
 
+        // get comments
+        final Collection<Comment> comments = commentRepository.findCommentsByItem_Id(itemId);
+
         // if user is not the owner just return the item
         if (item.getOwner().getId() != userId) {
-            return ItemObjectMapper.toItemResponseExtendedDto(item);
+            return ItemObjectMapper.toItemResponseExtendedDto(item, comments);
         }
 
         // get last item booking
@@ -142,7 +149,7 @@ public class ItemServiceJpa implements ItemService {
         final Booking nextBooking = bookingUtil.getNextItemBooking(itemId);
 
         // return item with bookings
-        return ItemObjectMapper.toItemResponseExtendedDto(item, lastBooking, nextBooking);
+        return ItemObjectMapper.toItemResponseExtendedDto(item, lastBooking, nextBooking, comments);
     }
 
     @Override
@@ -162,7 +169,11 @@ public class ItemServiceJpa implements ItemService {
         // get next bookings
         List<Booking> nextBookings = bookingUtil.getNextItemsBookings(itemIdToItemExtDto.keySet());
 
-        for (int i = 0; i < Integer.max(lastBookings.size(), nextBookings.size()); ++i) {
+        // get comments
+        List<Comment> comments = commentRepository.findCommentsByItem_IdIn(itemIdToItemExtDto.keySet());
+
+        final int size = Collections.max(List.of(lastBookings.size(), nextBookings.size(), comments.size()));
+        for (int i = 0; i < size; ++i) {
             if (i < lastBookings.size()) {
                 Booking lastBooking = lastBookings.get(i);
                 ItemResponseExtendedDto dto = itemIdToItemExtDto.get(lastBooking.getItem().getId());
@@ -173,6 +184,18 @@ public class ItemServiceJpa implements ItemService {
                 Booking nextBooking = nextBookings.get(i);
                 ItemResponseExtendedDto dto = itemIdToItemExtDto.get(nextBooking.getItem().getId());
                 dto.setNextBooking(ItemObjectMapper.toBookingShortResponseDto(nextBooking));
+            }
+
+            if (i < comments.size()) {
+                Comment comment = comments.get(i);
+                ItemResponseExtendedDto dto = itemIdToItemExtDto.get(comment.getItem().getId());
+
+                Collection<CommentResponseDto> itemComments = dto.getComments();
+                if (itemComments == null) {
+                    itemComments = new ArrayList<>();
+                }
+
+                itemComments.add(CommentObjectMapper.toResponseDto(comment));
             }
         }
 
@@ -199,6 +222,12 @@ public class ItemServiceJpa implements ItemService {
 
         if (!StringUtils.hasText(itemRequestDto.getDescription())) {
             throw new ValidationException("Item description cannot be null or blank");
+        }
+    }
+
+    private void validateToCreate(CommentRequestDto commentRequestDto) {
+        if (!StringUtils.hasText(commentRequestDto.getText())) {
+            throw new ValidationException("Comment text cannot be null or blank");
         }
     }
 }

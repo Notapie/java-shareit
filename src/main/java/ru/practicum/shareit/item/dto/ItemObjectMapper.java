@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -49,29 +50,40 @@ public class ItemObjectMapper {
                 .build();
     }
 
-    public static ItemResponseExtendedDto toItemResponseExtendedDto(Item item, Booking lastBooking, Booking nextBooking) {
+    public static ItemResponseExtendedDto toItemResponseExtendedDto(Item item) {
+        return toItemResponseExtendedDto(item, null);
+    }
+
+    public static ItemResponseExtendedDto toItemResponseExtendedDto(Item item, Booking lastBooking, Booking nextBooking,
+                                                                    Collection<Comment> comments) {
+        ItemResponseExtendedDto.ItemResponseExtendedDtoBuilder builder = ItemResponseExtendedDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getIsAvailable())
+                .comments(CommentObjectMapper.toResponseDto(comments));
+
+        if (lastBooking != null) {
+            builder.lastBooking(toBookingShortResponseDto(lastBooking));
+        }
+        if (nextBooking != null) {
+            builder.nextBooking(toBookingShortResponseDto(nextBooking));
+        }
+
+        return builder.build();
+    }
+
+    public static ItemResponseExtendedDto toItemResponseExtendedDto(Item item, Collection<Comment> comments) {
         ItemResponseExtendedDto.ItemResponseExtendedDtoBuilder builder = ItemResponseExtendedDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getIsAvailable());
 
-                if (lastBooking != null) {
-                    builder.lastBooking(toBookingShortResponseDto(lastBooking));
-                }
-                if (nextBooking != null) {
-                    builder.nextBooking(toBookingShortResponseDto(nextBooking));
-                }
+        if (comments != null) {
+            builder.comments(CommentObjectMapper.toResponseDto(comments));
+        }
 
         return builder.build();
-    }
-
-    public static ItemResponseExtendedDto toItemResponseExtendedDto(Item item) {
-        return ItemResponseExtendedDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getIsAvailable())
-                .build();
     }
 }

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
@@ -26,8 +27,8 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentResponseDto addComment(@PathVariable int itemId, @RequestHeader(name = "X-Sharer-User-Id") int authorId,
-                                         CommentRequestDto commentRequestDto) {
+    public CommentResponseDto addComment(@PathVariable int itemId, @RequestBody CommentRequestDto commentRequestDto,
+                                         @RequestHeader(name = "X-Sharer-User-Id") int authorId) {
         return CommentObjectMapper.toResponseDto(itemService.addComment(commentRequestDto, itemId, authorId));
     }
 

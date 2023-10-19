@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 
+import java.util.Collection;
+
 @Data
 @Builder(toBuilder = true)
 public class ItemResponseExtendedDto {
@@ -11,4 +13,5 @@ public class ItemResponseExtendedDto {
     Boolean available;
     BookingShortResponseDto lastBooking;
     BookingShortResponseDto nextBooking;
+    Collection<CommentResponseDto> comments;
 }
