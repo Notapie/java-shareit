@@ -48,4 +48,9 @@ public class BookingJpaUtil {
     public List<Booking> getNextItemsBookings(Collection<Integer> itemIds) {
         return bookingRepository.findNextBookingsByItemIds(itemIds, LocalDateTime.now());
     }
+
+    public boolean isUserHasBookedItem(int userId, int itemId) {
+        return bookingRepository.existsByBooker_IdAndItem_IdAndStatusAndEndTimeBefore(userId, itemId,
+                Booking.Status.APPROVED, LocalDateTime.now());
+    }
 }

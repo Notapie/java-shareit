@@ -48,4 +48,7 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
 
     @Query("from Booking where item.id in ?1 and status = 'APPROVED' and startTime > ?2 order by startTime asc")
     List<Booking> findNextBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
+
+    // comments
+    boolean existsByBooker_IdAndItem_IdAndStatusAndEndTimeBefore(int bookerId, int itemId, Booking.Status status, LocalDateTime currentTime);
 }

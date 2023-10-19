@@ -10,15 +10,16 @@ import ru.practicum.shareit.booking.service.impl.BookingJpaUtil;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemObjectMapper;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemResponseExtendedDto;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentJpaRepository;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -27,6 +28,7 @@ import java.util.*;
 @Primary
 public class ItemServiceJpa implements ItemService {
     private final ItemJpaRepository itemRepository;
+    private final CommentJpaRepository commentRepository;
     private final ItemJpaUtil itemUtil;
     private final UserJpaUtil userUtil;
     private final BookingJpaUtil bookingUtil;
@@ -85,10 +87,41 @@ public class ItemServiceJpa implements ItemService {
         // save updated item
         try {
             Item savedItem = itemRepository.save(item);
-            log.debug("Item updated." + item);
+            log.debug("Item updated. " + savedItem);
             return savedItem;
         } catch (Exception e) {
             throw new SaveException("Failed to save updated item" + item, e);
+        }
+    }
+
+    @Override
+    public Comment addComment(CommentRequestDto commentRequestDto, int itemId, int authorId) {
+        // get item
+        final Item item = itemUtil.requireFindById(itemId);
+
+        // get author
+        final User author = userUtil.requireFindById(authorId);
+
+        // check if the author has booked the item
+        if (!bookingUtil.isUserHasBookedItem(authorId, itemId)) {
+            throw new ValidationException("The user has never booked this item");
+        }
+
+        // create comment entity
+        final Comment comment = CommentObjectMapper.fromCommentRequestDto(
+                commentRequestDto,
+                author,
+                item,
+                LocalDateTime.now()
+        );
+
+        // save new comment
+        try {
+            final Comment savedComment = commentRepository.save(comment);
+            log.debug("Comment created. " + savedComment);
+            return savedComment;
+        } catch (Exception e) {
+            throw new SaveException("Failed to save new comment. " + comment, e);
         }
     }
 
