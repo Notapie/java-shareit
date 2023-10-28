@@ -91,8 +91,7 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
     @Query("from Booking " +
             "where item.id = :itemId " +
             "and status = 'APPROVED' " +
-            "and startTime <= :currentTime " +
-            "order by startTime desc")
+            "and startTime <= :currentTime")
     List<Booking> findLastBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
 
     // item next bookings
@@ -107,8 +106,7 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
     @Query("from Booking " +
             "where item.id = :itemId " +
             "and status = 'APPROVED' " +
-            "and startTime > :currentTime " +
-            "order by startTime asc")
+            "and startTime > :currentTime")
     List<Booking> findNextBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
 
     // comments

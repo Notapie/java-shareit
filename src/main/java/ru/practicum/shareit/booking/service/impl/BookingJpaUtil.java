@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
@@ -31,7 +32,8 @@ public class BookingJpaUtil {
 
     public Booking getLastItemBooking(int itemId) {
         List<Booking> result = bookingRepository
-                .findLastBookingByItemId(itemId, LocalDateTime.now(), PageRequest.of(0, 1));
+                .findLastBookingByItemId(itemId, LocalDateTime.now(),
+                        PageRequest.of(0, 1, Sort.Direction.DESC, "start_time"));
         return result.isEmpty() ? null : result.get(0);
     }
 
