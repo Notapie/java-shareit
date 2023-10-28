@@ -45,7 +45,7 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
             "where booker.id = :bookerId " +
             "and startTime < :currentTime " +
             "and endTime > :currentTime " +
-            "order by startTime desc")
+            "order by startTime, endTime desc")
     List<Booking> findCurrentBookingsByBookerIdAndCurrentTime(int bookerId, LocalDateTime currentTime);
 
     // owner searching
@@ -76,7 +76,7 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
             "where item.owner.id = :ownerId " +
             "and startTime < :time " +
             "and endTime > :time " +
-            "order by startTime desc")
+            "order by startTime, endTime desc")
     List<Booking> findCurrentBookingsByItemOwnerIdAndCurrentTime(int ownerId, LocalDateTime time);
 
     // item last bookings
