@@ -136,26 +136,23 @@ public class BookingServiceJpa implements BookingService {
         userUtil.assertExists(bookerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByBooker_IdOrderByStartTimeDesc(bookerId);
+            return bookingRepository.findBookingsByBookerId(bookerId);
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByBooker_IdAndStatusOrderByStartTimeDesc(bookerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByBookerIdAndStatus(bookerId, Booking.Status.valueOf(bookingState));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByBooker_IdAndEndTimeIsBeforeOrderByStartTimeDesc(bookerId,
-                    LocalDateTime.now());
+            return bookingRepository.findBookingsByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now());
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findBookingsByBooker_IdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(bookerId,
-                    LocalDateTime.now(), LocalDateTime.now());
+            return bookingRepository.findCurrentBookingsByBookerIdAndCurrentTime(bookerId, LocalDateTime.now());
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByBooker_IdAndStartTimeIsAfterOrderByStartTimeDesc(bookerId,
-                    LocalDateTime.now());
+            return bookingRepository.findBookingsByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now());
         }
 
         throw new UnknownStateException("Invalid state");
@@ -166,26 +163,23 @@ public class BookingServiceJpa implements BookingService {
         userUtil.assertExists(ownerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByItem_Owner_idOrderByStartTimeDesc(ownerId);
+            return bookingRepository.findBookingsByItemOwnerId(ownerId);
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(ownerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByItemOwnerIdAndStatus(ownerId, Booking.Status.valueOf(bookingState));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(ownerId,
-                    LocalDateTime.now());
+            return bookingRepository.findBookingsByItemOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now());
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(ownerId,
-                    LocalDateTime.now(), LocalDateTime.now());
+            return bookingRepository.findCurrentBookingsByItemOwnerIdAndCurrentTime(ownerId, LocalDateTime.now());
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(ownerId,
-                    LocalDateTime.now());
+            return bookingRepository.findBookingsByItemOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now());
         }
 
         throw new UnknownStateException("Invalid state");

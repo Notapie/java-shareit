@@ -10,8 +10,8 @@ public interface ItemJpaRepository extends JpaRepository<Item, Integer> {
     List<Item> findItemsByOwnerIdIs(int ownerId);
 
     @Query("from Item " +
-            "where (lower(name) like lower(concat('%', ?1, '%')) " +
-            "or lower(description) like lower(concat('%', ?1, '%'))) " +
+            "where (lower(name) like lower(concat('%', :query, '%')) " +
+            "or lower(description) like lower(concat('%', :query, '%'))) " +
             "and isAvailable = true")
     List<Item> searchItemsByQuery(String query);
 }

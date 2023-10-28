@@ -10,45 +10,108 @@ import java.util.Collection;
 import java.util.List;
 
 public interface BookingJpaRepository extends JpaRepository<Booking, Integer> {
-    @Query("from Booking where item.id = ?1 and startTime <= ?3 and endTime >= ?2 and status = 'APPROVED'")
+    @Query("from Booking " +
+            "where item.id = :itemId " +
+            "and startTime <= :secondDate " +
+            "and endTime >= :firstDate " +
+            "and status = 'APPROVED'")
     List<Booking> findBookingsBetweenDates(int itemId, LocalDateTime firstDate, LocalDateTime secondDate);
 
     // booker searching
-    List<Booking> findBookingsByBooker_IdOrderByStartTimeDesc(int bookerId);
+    @Query("from Booking " +
+            "where booker.id = :bookerId " +
+            "order by startTime desc")
+    List<Booking> findBookingsByBookerId(int bookerId);
 
-    List<Booking> findBookingsByBooker_IdAndStatusOrderByStartTimeDesc(int bookerId, Booking.Status status);
+    @Query("from Booking " +
+            "where booker.id = :bookerId " +
+            "and status = :status " +
+            "order by startTime desc")
+    List<Booking> findBookingsByBookerIdAndStatus(int bookerId, Booking.Status status);
 
-    List<Booking> findBookingsByBooker_IdAndEndTimeIsBeforeOrderByStartTimeDesc(int bookerId, LocalDateTime time);
+    @Query("from Booking " +
+            "where booker.id = :bookerId " +
+            "and endTime < :time " +
+            "order by startTime desc")
+    List<Booking> findBookingsByBookerIdAndEndIsBefore(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByBooker_IdAndStartTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime time);
+    @Query("from Booking " +
+            "where booker.id = :bookerId " +
+            "and startTime > :time " +
+            "order by startTime desc")
+    List<Booking> findBookingsByBookerIdAndStartIsAfter(int bookerId, LocalDateTime time);
 
-    List<Booking> findBookingsByBooker_IdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int bookerId, LocalDateTime firstDate, LocalDateTime secondDate);
+    @Query("from Booking " +
+            "where booker.id = :bookerId " +
+            "and startTime < :currentTime " +
+            "and endTime > :currentTime " +
+            "order by startTime desc")
+    List<Booking> findCurrentBookingsByBookerIdAndCurrentTime(int bookerId, LocalDateTime currentTime);
 
     // owner searching
-    List<Booking> findBookingsByItem_Owner_idOrderByStartTimeDesc(int ownerId);
+    @Query("from Booking " +
+            "where item.owner.id = :ownerId " +
+            "order by startTime desc")
+    List<Booking> findBookingsByItemOwnerId(int ownerId);
 
-    List<Booking> findBookingsByItem_Owner_idAndStatusOrderByStartTimeDesc(int ownerId, Booking.Status status);
+    @Query("from Booking " +
+            "where item.owner.id = :ownerId " +
+            "and status = :status " +
+            "order by startTime desc")
+    List<Booking> findBookingsByItemOwnerIdAndStatus(int ownerId, Booking.Status status);
 
-    List<Booking> findBookingsByItem_Owner_idAndEndTimeIsBeforeOrderByStartTimeDesc(int ownerId, LocalDateTime time);
+    @Query("from Booking " +
+            "where item.owner.id = :ownerId " +
+            "and endTime < :time " +
+            "order by startTime desc")
+    List<Booking> findBookingsByItemOwnerIdAndEndIsBefore(int ownerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsAfterOrderByStartTimeDesc(int ownerId, LocalDateTime time);
+    @Query("from Booking " +
+            "where item.owner.id = :ownerId " +
+            "and startTime > :time " +
+            "order by startTime desc")
+    List<Booking> findBookingsByItemOwnerIdAndStartIsAfter(int ownerId, LocalDateTime time);
 
-    List<Booking> findBookingsByItem_Owner_idAndStartTimeIsBeforeAndEndTimeIsAfterOrderByStartTimeDesc(int ownerId, LocalDateTime firstDate, LocalDateTime secondDate);
+    @Query("from Booking " +
+            "where item.owner.id = :ownerId " +
+            "and startTime < :time " +
+            "and endTime > :time " +
+            "order by startTime desc")
+    List<Booking> findCurrentBookingsByItemOwnerIdAndCurrentTime(int ownerId, LocalDateTime time);
 
     // item last bookings
-    @Query(value = "SELECT DISTINCT ON (item_id) * FROM \"booking\" WHERE item_id IN ?1 AND status = 'APPROVED' AND start_time <= ?2 ORDER BY item_id, start_time DESC", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (item_id) * " +
+            "FROM \"booking\" " +
+            "WHERE item_id IN :itemIds " +
+            "AND status = 'APPROVED' " +
+            "AND start_time <= :currentTime " +
+            "ORDER BY item_id, start_time DESC", nativeQuery = true)
     List<Booking> findLastBookingsByItemIds(Collection<Integer> itemIds, LocalDateTime currentTime);
 
-    @Query("from Booking where item.id = ?1 and status = 'APPROVED' and startTime <= ?2 order by startTime desc")
+    @Query("from Booking " +
+            "where item.id = :itemId " +
+            "and status = 'APPROVED' " +
+            "and startTime <= :currentTime " +
+            "order by startTime desc")
     List<Booking> findLastBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
 
     // item next bookings
-    @Query(value = "SELECT DISTINCT ON (item_id) * FROM \"booking\" WHERE item_id IN ?1 AND status = 'APPROVED' AND start_time > ?2 ORDER BY item_id, start_time", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (item_id) * " +
+            "FROM \"booking\" " +
+            "WHERE item_id IN :itemIds " +
+            "AND status = 'APPROVED' " +
+            "AND start_time > :currentTime " +
+            "ORDER BY item_id, start_time", nativeQuery = true)
     List<Booking> findNextBookingsByItemIds(Collection<Integer> itemIds, LocalDateTime currentTime);
 
-    @Query("from Booking where item.id in ?1 and status = 'APPROVED' and startTime > ?2 order by startTime asc")
+    @Query("from Booking " +
+            "where item.id = :itemId " +
+            "and status = 'APPROVED' " +
+            "and startTime > :currentTime " +
+            "order by startTime asc")
     List<Booking> findNextBookingByItemId(int itemId, LocalDateTime currentTime, Pageable pageable);
 
     // comments
-    boolean existsByBooker_IdAndItem_IdAndStatusAndEndTimeBefore(int bookerId, int itemId, Booking.Status status, LocalDateTime currentTime);
+    boolean existsByBooker_IdAndItem_IdAndStatusAndEndTimeBefore(int bookerId, int itemId, Booking.Status status,
+                                                                 LocalDateTime currentTime);
 }
