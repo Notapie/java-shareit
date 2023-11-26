@@ -3,6 +3,7 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -60,7 +61,10 @@ public class ItemRequestService {
 
     public Collection<ItemRequest> getAll(int fromIndex, int size) {
         log.debug("Get all item requests. FromIndex " + fromIndex + ", size " + size);
-        Collection<ItemRequest> requests = irRepository.findItemRequestsFromIndex(fromIndex, PageRequest.ofSize(size));
+        Collection<ItemRequest> requests = irRepository.findItemRequestsFromIndex(
+                fromIndex,
+                PageRequest.of(fromIndex / size, size, Sort.by("create").descending())
+        );
         log.debug("Found " + requests.size() + " requests");
         return requests;
     }

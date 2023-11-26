@@ -17,12 +17,16 @@ public class IRObjectMapper {
     }
 
     public static IRResponseDto toResponseDto(ItemRequest itemRequest) {
-        return IRResponseDto.builder()
+        IRResponseDto.IRResponseDtoBuilder builder = IRResponseDto.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
-                .created(itemRequest.getCreated())
-                .items(ItemObjectMapper.toItemResponseDto(itemRequest.getItems()))
-                .build();
+                .created(itemRequest.getCreated());
+
+        if (itemRequest.getItems() != null) {
+            builder.items(ItemObjectMapper.toItemResponseDto(itemRequest.getItems()));
+        }
+
+        return builder.build();
     }
 
     public static Collection<IRResponseDto> toResponseDto(Collection<ItemRequest> itemRequests) {
