@@ -27,7 +27,8 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public Collection<IRResponseDto> getAllRequests(@RequestParam int from, @RequestParam int size) {
+    public Collection<IRResponseDto> getAllRequests(@RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "10") int size) {
         return IRObjectMapper.toResponseDto(irService.getAll(from, size));
     }
 
