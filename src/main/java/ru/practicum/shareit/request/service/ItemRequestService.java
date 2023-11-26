@@ -61,8 +61,7 @@ public class ItemRequestService {
 
     public Collection<ItemRequest> getAll(int fromIndex, int size) {
         log.debug("Get all item requests. FromIndex " + fromIndex + ", size " + size);
-        Collection<ItemRequest> requests = irRepository.findItemRequestsFromIndex(
-                fromIndex,
+        Collection<ItemRequest> requests = irRepository.findAllItemRequests(
                 PageRequest.of(fromIndex / size, size, Sort.by("create").descending())
         );
         log.debug("Found " + requests.size() + " requests");
