@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Builder;
 import lombok.Value;
-import ru.practicum.shareit.request.dto.IRResponseDto;
 
 @Value
 @Builder

@@ -4,7 +4,6 @@ import ru.practicum.shareit.item.dto.ItemObjectMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
