@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.IRRequestDto;
 import ru.practicum.shareit.request.dto.IRResponseDto;
+import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.Collection;
 
@@ -11,6 +12,8 @@ import java.util.Collection;
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 public class ItemRequestController {
+    private final ItemRequestService itemRequestService;
+
     @PostMapping
     public IRResponseDto addNewRequest(@RequestBody IRRequestDto irRequestDto,
                                        @RequestHeader(name = "X-Sharer-User-Id") int ownerId) {
