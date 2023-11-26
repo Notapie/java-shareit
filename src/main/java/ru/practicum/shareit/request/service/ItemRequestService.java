@@ -2,8 +2,10 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.IRObjectMapper;
@@ -24,6 +26,7 @@ public class ItemRequestService {
     private final UserJpaUtil userUtil;
 
     public ItemRequest createNew(IRRequestDto irRequestDto, int ownerId) {
+        log.debug("Item request creation request. Owner id: " + ownerId + ", " + irRequestDto);
         // validate request description
         if (!StringUtils.hasText(irRequestDto.getDescription())) {
             throw new ValidationException("Item request description cannot be null or blank");
@@ -49,17 +52,32 @@ public class ItemRequestService {
     }
 
     public Collection<ItemRequest> getAllByOwner(int ownerId) {
-        // TODO: add method body
-        return null;
+        log.debug("Get all item requests by owner. Owner id " + ownerId);
+        Collection<ItemRequest> requests = irRepository.findItemRequestsByOwner_Id(ownerId);
+        log.debug("Found " + requests.size() + " requests");
+        return requests;
     }
 
     public Collection<ItemRequest> getAll(int fromIndex, int size) {
-        // TODO: add method body
-        return null;
+        log.debug("Get all item requests. FromIndex " + fromIndex + ", size " + size);
+        Collection<ItemRequest> requests = irRepository.findItemRequestsFromIndex(fromIndex, PageRequest.ofSize(size));
+        log.debug("Found " + requests.size() + " requests");
+        return requests;
     }
 
     public ItemRequest getById(int requestId) {
-        // TODO: add method body
-        return null;
+        log.debug("Get item request by id " + requestId);
+        return requireFindById(requestId);
+    }
+
+    private void assertExists(int requestId) {
+        if (!irRepository.existsById(requestId)) {
+            throw new NotFoundException("Item request with id " + requestId + " not found");
+        }
+    }
+
+    private ItemRequest requireFindById(int requestId) {
+        assertExists(requestId);
+        return irRepository.getReferenceById(requestId);
     }
 }
