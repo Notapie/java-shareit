@@ -52,7 +52,7 @@ public class ItemServiceJpa implements ItemService {
             log.debug("Item created." + item);
             return savedItem;
         } catch (Exception e) {
-            throw new SaveException("Failed to save a new item" + item, e);
+            throw new SaveException("Failed to save a new item. " + item, e);
         }
     }
 
@@ -90,7 +90,7 @@ public class ItemServiceJpa implements ItemService {
             log.debug("Item updated. " + savedItem);
             return savedItem;
         } catch (Exception e) {
-            throw new SaveException("Failed to save updated item" + item, e);
+            throw new SaveException("Failed to save updated item. " + item, e);
         }
     }
 
