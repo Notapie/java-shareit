@@ -1,10 +1,11 @@
 package ru.practicum.shareit.request.dto;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class IRRequestDto {
     String description;
 }

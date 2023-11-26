@@ -10,6 +10,8 @@ import ru.practicum.shareit.request.dto.IRObjectMapper;
 import ru.practicum.shareit.request.dto.IRRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestJpaRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -19,6 +21,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ItemRequestService {
     private final ItemRequestJpaRepository irRepository;
+    private final UserJpaUtil userUtil;
 
     public ItemRequest createNew(IRRequestDto irRequestDto, int ownerId) {
         // validate request description
@@ -26,8 +29,11 @@ public class ItemRequestService {
             throw new ValidationException("Item request description cannot be null or blank");
         }
 
+        // find owner by id
+        final User owner = userUtil.requireFindById(ownerId);
+
         // get ItemRequest
-        final ItemRequest itemRequest = IRObjectMapper.fromRequestDto(irRequestDto);
+        final ItemRequest itemRequest = IRObjectMapper.fromRequestDto(irRequestDto, owner);
 
         // insert create time
         itemRequest.setCreated(LocalDateTime.now());

@@ -17,12 +17,12 @@ public class ItemRequestController {
 
     @PostMapping
     public IRResponseDto addNewRequest(@RequestBody IRRequestDto irRequestDto,
-                                       @RequestHeader(name = "X-Sharer-User-Id") int ownerId) {
+                                       @RequestHeader("X-Sharer-User-Id") int ownerId) {
         return IRObjectMapper.toResponseDto(irService.createNew(irRequestDto, ownerId));
     }
 
     @GetMapping
-    public Collection<IRResponseDto> getAllUserRequests(@RequestHeader(name = "X-Sharer-User-Id") int ownerId) {
+    public Collection<IRResponseDto> getAllUserRequests(@RequestHeader("X-Sharer-User-Id") int ownerId) {
         return IRObjectMapper.toResponseDto(irService.getAllByOwner(ownerId));
     }
 
