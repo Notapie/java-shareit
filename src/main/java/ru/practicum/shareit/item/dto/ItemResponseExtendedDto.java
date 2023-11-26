@@ -14,4 +14,5 @@ public class ItemResponseExtendedDto {
     BookingShortResponseDto lastBooking;
     BookingShortResponseDto nextBooking;
     Collection<CommentResponseDto> comments;
+    Integer requestId;
 }

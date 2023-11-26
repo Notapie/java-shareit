@@ -9,4 +9,5 @@ public class ItemRequestDto {
     String name;
     String description;
     Boolean available;
+    Integer requestId;
 }

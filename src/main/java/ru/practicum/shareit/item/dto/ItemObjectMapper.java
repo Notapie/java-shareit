@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class ItemObjectMapper {
+    // TODO: add item request mapping
     public static Item fromItemRequestDto(ItemRequestDto itemRequestDto) {
         return Item.builder()
                 .name(itemRequestDto.getName())
