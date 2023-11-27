@@ -56,7 +56,7 @@ public class ItemRequestService {
         log.debug("Get all item requests by owner. Owner id " + ownerId);
 
         // get owner
-        userUtil.requireFindById(ownerId);
+        userUtil.assertExists(ownerId);
 
         // get owner requests
         Collection<ItemRequest> requests = irRepository.findItemRequestsByOwner_Id(ownerId);
@@ -72,7 +72,7 @@ public class ItemRequestService {
         log.debug("Get all item requests. FromIndex " + fromIndex + ", size " + size);
 
         // get user
-        userUtil.requireFindById(userId);
+        userUtil.assertExists(userId);
 
         // get all other users requests
         Collection<ItemRequest> requests = irRepository.findAllItemRequestsExcludeOwner(
@@ -88,7 +88,7 @@ public class ItemRequestService {
         log.debug("Get item request by id " + requestId + " from user with id " + userId);
 
         // get user
-        userUtil.requireFindById(userId);
+        userUtil.assertExists(userId);
 
         // get request
         return irUtil.requireFindById(requestId);
