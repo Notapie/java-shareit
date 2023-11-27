@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class ItemObjectMapper {
-    // TODO: add item request mapping
     public static Item fromItemRequestDto(ItemRequestDto itemRequestDto) {
         return Item.builder()
                 .name(itemRequestDto.getName())
@@ -28,12 +27,17 @@ public class ItemObjectMapper {
     }
 
     public static ItemResponseDto toItemResponseDto(Item item) {
-        return ItemResponseDto.builder()
+        ItemResponseDto.ItemResponseDtoBuilder builder = ItemResponseDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
-                .available(item.getIsAvailable())
-                .build();
+                .available(item.getIsAvailable());
+
+        if (item.getItemRequest() != null) {
+            builder.requestId(item.getItemRequest().getId());
+        }
+
+        return builder.build();
     }
 
     public static Collection<ItemResponseDto> toItemResponseDto(Collection<Item> items) {
@@ -70,6 +74,9 @@ public class ItemObjectMapper {
         if (nextBooking != null) {
             builder.nextBooking(toBookingShortResponseDto(nextBooking));
         }
+        if (item.getItemRequest() != null) {
+            builder.requestId(item.getItemRequest().getId());
+        }
 
         return builder.build();
     }
@@ -83,6 +90,9 @@ public class ItemObjectMapper {
 
         if (comments != null) {
             builder.comments(CommentObjectMapper.toResponseDto(comments));
+        }
+        if (item.getItemRequest() != null) {
+            builder.requestId(item.getItemRequest().getId());
         }
 
         return builder.build();
