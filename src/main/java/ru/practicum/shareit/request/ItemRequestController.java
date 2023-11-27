@@ -28,12 +28,13 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public Collection<IRResponseDto> getAllRequests(@RequestParam(defaultValue = "0") int from,
-                                                    @RequestParam(defaultValue = "10") int size) {
-        return IRObjectMapper.toResponseDto(irService.getAll(from, size));
+                                                    @RequestParam(defaultValue = "10") int size,
+                                                    @RequestHeader("X-Sharer-User-Id") int userId) {
+        return IRObjectMapper.toResponseDto(irService.getAll(userId, from, size));
     }
 
     @GetMapping("/{requestId}")
-    public IRResponseDto getRequest(@PathVariable int requestId) {
-        return IRObjectMapper.toResponseDto(irService.getById(requestId));
+    public IRResponseDto getRequest(@PathVariable int requestId, @RequestHeader("X-Sharer-User-Id") int userId) {
+        return IRObjectMapper.toResponseDto(irService.getById(userId, requestId));
     }
 }

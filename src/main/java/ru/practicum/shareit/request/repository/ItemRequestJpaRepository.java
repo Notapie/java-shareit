@@ -11,6 +11,6 @@ import java.util.List;
 public interface ItemRequestJpaRepository extends JpaRepository<ItemRequest, Integer> {
     Collection<ItemRequest> findItemRequestsByOwner_Id(int ownerId);
 
-    @Query("from ItemRequest")
-    List<ItemRequest> findAllItemRequests(Pageable pageable);
+    @Query("from ItemRequest where owner.id != :ownerId")
+    List<ItemRequest> findAllItemRequestsExcludeOwner(int ownerId, Pageable pageable);
 }

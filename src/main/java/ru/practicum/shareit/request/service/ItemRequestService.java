@@ -54,22 +54,43 @@ public class ItemRequestService {
 
     public Collection<ItemRequest> getAllByOwner(int ownerId) {
         log.debug("Get all item requests by owner. Owner id " + ownerId);
+
+        // get owner
+        userUtil.requireFindById(ownerId);
+
+        // get owner requests
         Collection<ItemRequest> requests = irRepository.findItemRequestsByOwner_Id(ownerId);
+
         log.debug("Found " + requests.size() + " requests");
         return requests;
     }
 
-    public Collection<ItemRequest> getAll(int fromIndex, int size) {
+    public Collection<ItemRequest> getAll(int userId, int fromIndex, int size) {
+        if (fromIndex < 0 || size <= 0) {
+            throw new ValidationException("From or size params cannot be negative, size cannot be 0");
+        }
         log.debug("Get all item requests. FromIndex " + fromIndex + ", size " + size);
-        Collection<ItemRequest> requests = irRepository.findAllItemRequests(
-                PageRequest.of(fromIndex / size, size, Sort.by("create").descending())
+
+        // get user
+        userUtil.requireFindById(userId);
+
+        // get all other users requests
+        Collection<ItemRequest> requests = irRepository.findAllItemRequestsExcludeOwner(
+                userId,
+                PageRequest.of(fromIndex / size, size, Sort.by("created").descending())
         );
+
         log.debug("Found " + requests.size() + " requests");
         return requests;
     }
 
-    public ItemRequest getById(int requestId) {
-        log.debug("Get item request by id " + requestId);
+    public ItemRequest getById(int userId, int requestId) {
+        log.debug("Get item request by id " + requestId + " from user with id " + userId);
+
+        // get user
+        userUtil.requireFindById(userId);
+
+        // get request
         return irUtil.requireFindById(requestId);
     }
 }
