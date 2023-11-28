@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.dto.BookingObjectMapper;
@@ -142,27 +143,28 @@ public class BookingServiceJpa implements BookingService {
         userUtil.assertExists(bookerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByBookerId(bookerId, PageRequest.of(page, size));
+            return bookingRepository.findBookingsByBookerId(bookerId,
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
             return bookingRepository.findBookingsByBookerIdAndStatus(bookerId, Booking.Status.valueOf(bookingState),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("PAST")) {
             return bookingRepository.findBookingsByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("CURRENT")) {
             return bookingRepository.findCurrentBookingsByBookerIdAndCurrentTime(bookerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time", "end_time").descending()));
         }
 
         if (bookingState.equals("FUTURE")) {
             return bookingRepository.findBookingsByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         throw new UnknownStateException("Invalid state");
@@ -179,27 +181,27 @@ public class BookingServiceJpa implements BookingService {
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
             return bookingRepository.findBookingsByItemOwnerId(ownerId,
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
             return bookingRepository.findBookingsByItemOwnerIdAndStatus(ownerId, Booking.Status.valueOf(bookingState),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("PAST")) {
             return bookingRepository.findBookingsByItemOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("CURRENT")) {
             return bookingRepository.findCurrentBookingsByItemOwnerIdAndCurrentTime(ownerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time", "end_time").descending()));
         }
 
         if (bookingState.equals("FUTURE")) {
             return bookingRepository.findBookingsByItemOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now(),
-                    PageRequest.of(page, size));
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         throw new UnknownStateException("Invalid state");
