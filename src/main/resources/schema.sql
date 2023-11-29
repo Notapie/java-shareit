@@ -27,6 +27,8 @@ CREATE INDEX IF NOT EXISTS "item_name_index"
 CREATE INDEX IF NOT EXISTS "item_desc_index"
     ON "item" (description, is_available);
 
+DROP TABLE IF EXISTS "booking";
+DROP TYPE IF EXISTS booking_status;
 CREATE TYPE booking_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
 
 CREATE TABLE IF NOT EXISTS "booking" (
