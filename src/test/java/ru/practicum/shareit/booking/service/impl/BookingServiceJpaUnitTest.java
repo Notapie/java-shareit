@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BookingServiceJpaTest {
+class BookingServiceJpaUnitTest {
     @Mock
     BookingJpaRepository bookingRepositoryMock;
 
