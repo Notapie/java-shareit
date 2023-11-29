@@ -16,7 +16,6 @@ import ru.practicum.shareit.user.model.User;
 public class UserServiceIntegrationTest {
     private final UserServiceJpa userService;
 
-
     @Test
     @DisplayName("should success create new user")
     public void shouldSuccessCreateNewUser() {
