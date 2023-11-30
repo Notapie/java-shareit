@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
@@ -96,5 +97,46 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(expectedUserResponseDto.getId()), Integer.class))
                 .andExpect(jsonPath("$.name", is(expectedUserResponseDto.getName())))
                 .andExpect(jsonPath("$.email", is(expectedUserResponseDto.getEmail())));
+    }
+
+    @Test
+    @DisplayName("should success map and get user by id")
+    public void getUserById() throws Exception {
+        final User expectedUser = User.builder().id(1).name("user").email("user email").build();
+        final UserResponseDto expectedUserResponseDto = new UserResponseDto(expectedUser.getId(),
+                expectedUser.getName(), expectedUser.getEmail());
+
+        when(userServiceMock.getById(expectedUser.getId()))
+                .thenReturn(expectedUser);
+
+
+        mvc.perform(get("/users/" + expectedUser.getId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(expectedUserResponseDto.getId()), Integer.class))
+                .andExpect(jsonPath("$.name", is(expectedUserResponseDto.getName())))
+                .andExpect(jsonPath("$.email", is(expectedUserResponseDto.getEmail())));
+    }
+
+    @Test
+    @DisplayName("should success map and get all users")
+    public void getAllUsers() throws Exception {
+        final User expectedUser = User.builder().id(1).name("user").email("user email").build();
+        final UserResponseDto expectedUserResponseDto = new UserResponseDto(expectedUser.getId(),
+                expectedUser.getName(), expectedUser.getEmail());
+
+        when(userServiceMock.getAll())
+                .thenReturn(List.of(expectedUser));
+
+        mvc.perform(get("/users/")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(expectedUserResponseDto.getId()), Integer.class))
+                .andExpect(jsonPath("$.[0].name", is(expectedUserResponseDto.getName())))
+                .andExpect(jsonPath("$.[0].email", is(expectedUserResponseDto.getEmail())));
     }
 }
