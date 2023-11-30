@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,6 +83,27 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedResponse.getId()), Integer.class))
                 .andExpect(jsonPath("$.booker.name", is(expectedResponse.getBooker().getName())))
+                .andExpect(jsonPath("$.item.name", is(expectedResponse.getItem().getName())));
+    }
+
+    @Test
+    @DisplayName("should success map and approve waiting booking")
+    public void approveBooking() throws Exception {
+        final Booking.Status newStatus = Booking.Status.APPROVED;
+        when(bookingServiceMock.approve(expectedBooking.getId(),
+                expectedBooking.getItem().getOwner().getId(), true))
+                .thenReturn(expectedBooking.toBuilder().status(newStatus).build());
+
+        mvc.perform(patch("/bookings/" + expectedBooking.getId())
+                        .header("X-Sharer-User-Id", expectedBooking.getItem().getOwner().getId())
+                        .param("approved", "true")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(expectedResponse.getId()), Integer.class))
+                .andExpect(jsonPath("$.booker.name", is(expectedResponse.getBooker().getName())))
+                .andExpect(jsonPath("$.status", is(newStatus.toString())))
                 .andExpect(jsonPath("$.item.name", is(expectedResponse.getItem().getName())));
     }
 }
