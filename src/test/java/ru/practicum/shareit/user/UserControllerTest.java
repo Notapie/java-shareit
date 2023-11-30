@@ -12,12 +12,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,9 +46,30 @@ class UserControllerTest {
                     return UserObjectMapper.fromUserRequestDto(request, expectedUserResponseDto.getId());
                 });
 
-
         mvc.perform(post("/users")
-                .content(mapper.writeValueAsString(userRequestDto))
+                        .content(mapper.writeValueAsString(userRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(expectedUserResponseDto.getId()), Integer.class))
+                .andExpect(jsonPath("$.name", is(expectedUserResponseDto.getName())))
+                .andExpect(jsonPath("$.email", is(expectedUserResponseDto.getEmail())));
+    }
+
+    @Test
+    @DisplayName("should success map and update user")
+    public void updateUser() throws Exception {
+        final UserRequestDto userRequestDto = new UserRequestDto("updated username", null);
+        final User expectedUpdatedUser = User.builder().id(1).name(userRequestDto.getName()).email("old email").build();
+        final UserResponseDto expectedUserResponseDto = new UserResponseDto(expectedUpdatedUser.getId(),
+                expectedUpdatedUser.getName(), expectedUpdatedUser.getEmail());
+
+        when(userServiceMock.update(anyInt(), any()))
+                .thenReturn(expectedUpdatedUser);
+
+        mvc.perform(patch("/users/" + expectedUserResponseDto.getId())
+                        .content(mapper.writeValueAsString(userRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
