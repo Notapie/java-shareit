@@ -19,11 +19,11 @@ import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,10 +36,11 @@ class BookingControllerTest {
     private final ObjectMapper mapper;
     private final MockMvc mvc;
 
+    private final int bookerId = 1;
+    final int ownerId = 2;
+
     private final BookingRequestDto requestDto = new BookingRequestDto(1, LocalDateTime.now().plusHours(1),
             LocalDateTime.now().plusDays(1));
-
-    private final int bookerId = 1;
 
     private final Booking expectedBooking = Booking.builder()
             .id(1)
@@ -48,7 +49,7 @@ class BookingControllerTest {
                     .name("item")
                     .isAvailable(true)
                     .owner(User.builder()
-                            .id(2)
+                            .id(ownerId)
                             .name("owner name")
                             .email("owner email")
                             .build()
@@ -105,5 +106,67 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.booker.name", is(expectedResponse.getBooker().getName())))
                 .andExpect(jsonPath("$.status", is(newStatus.toString())))
                 .andExpect(jsonPath("$.item.name", is(expectedResponse.getItem().getName())));
+    }
+
+    @Test
+    @DisplayName("should success map and get booking by id")
+    public void getBookingById() throws Exception {
+        when(bookingServiceMock.getById(expectedBooking.getId(), bookerId))
+                .thenReturn(expectedBooking);
+
+        mvc.perform(get("/bookings/" + expectedBooking.getId())
+                        .header("X-Sharer-User-Id", bookerId)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(expectedResponse.getId()), Integer.class))
+                .andExpect(jsonPath("$.booker.name", is(expectedResponse.getBooker().getName())))
+                .andExpect(jsonPath("$.status", is(expectedBooking.getStatus().toString())))
+                .andExpect(jsonPath("$.item.name", is(expectedResponse.getItem().getName())));
+    }
+
+    @Test
+    @DisplayName("should success map and get all booker bookings")
+    public void getAllBookerBookings() throws Exception {
+        final String state = "ALL";
+        final int from = 0;
+        final int size = 10;
+        when(bookingServiceMock.getAllForBooker(bookerId, state, from, size))
+                .thenReturn(List.of(expectedBooking));
+
+        mvc.perform(get("/bookings/")
+                        .header("X-Sharer-User-Id", bookerId)
+                        .param("state", state)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(expectedResponse.getId()), Integer.class))
+                .andExpect(jsonPath("$.[0].booker.name", is(expectedResponse.getBooker().getName())))
+                .andExpect(jsonPath("$.[0].status", is(expectedBooking.getStatus().toString())))
+                .andExpect(jsonPath("$.[0].item.name", is(expectedResponse.getItem().getName())));
+    }
+
+    @Test
+    @DisplayName("should success map and get all item owner bookings")
+    public void getAllItemOwnerBookings() throws Exception {
+        final String state = "ALL";
+        final int from = 0;
+        final int size = 10;
+        when(bookingServiceMock.getAllForOwner(ownerId, state, from, size))
+                .thenReturn(List.of(expectedBooking));
+
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", ownerId)
+                        .param("state", state)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(expectedResponse.getId()), Integer.class))
+                .andExpect(jsonPath("$.[0].booker.name", is(expectedResponse.getBooker().getName())))
+                .andExpect(jsonPath("$.[0].status", is(expectedBooking.getStatus().toString())))
+                .andExpect(jsonPath("$.[0].item.name", is(expectedResponse.getItem().getName())));
     }
 }
