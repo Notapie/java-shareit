@@ -10,6 +10,7 @@ import ru.practicum.shareit.request.repository.ItemRequestJpaRepository;
 @RequiredArgsConstructor
 public class ItemRequestJpaUtil {
     private final ItemRequestJpaRepository irRepository;
+
     public void assertExists(int requestId) {
         if (!irRepository.existsById(requestId)) {
             throw new NotFoundException("Item request with id " + requestId + " not found");
