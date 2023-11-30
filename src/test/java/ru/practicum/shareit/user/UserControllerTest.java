@@ -19,8 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,6 +69,26 @@ class UserControllerTest {
 
         mvc.perform(patch("/users/" + expectedUserResponseDto.getId())
                         .content(mapper.writeValueAsString(userRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(expectedUserResponseDto.getId()), Integer.class))
+                .andExpect(jsonPath("$.name", is(expectedUserResponseDto.getName())))
+                .andExpect(jsonPath("$.email", is(expectedUserResponseDto.getEmail())));
+    }
+
+    @Test
+    @DisplayName("should success map and delete user by id")
+    public void deleteUser() throws Exception {
+        final User expectedDeletedUser = User.builder().id(1).name("deleted user").email("user email").build();
+        final UserResponseDto expectedUserResponseDto = new UserResponseDto(expectedDeletedUser.getId(),
+                expectedDeletedUser.getName(), expectedDeletedUser.getEmail());
+
+        when(userServiceMock.deleteById(expectedDeletedUser.getId()))
+                .thenReturn(expectedDeletedUser);
+
+        mvc.perform(delete("/users/" + expectedDeletedUser.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
