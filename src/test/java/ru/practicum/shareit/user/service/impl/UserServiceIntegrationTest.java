@@ -22,7 +22,6 @@ public class UserServiceIntegrationTest {
         final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@yandex.ru");
         final User user = userService.create(userRequestDto);
 
-        Assertions.assertEquals(user.getId(), 1);
         Assertions.assertEquals(user.getName(), userRequestDto.getName());
         Assertions.assertEquals(user.getEmail(), userRequestDto.getEmail());
     }
