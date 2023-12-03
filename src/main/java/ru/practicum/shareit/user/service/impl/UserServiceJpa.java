@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.DeleteException;
 import ru.practicum.shareit.exception.SaveException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserObjectMapper;
@@ -88,7 +87,7 @@ public class UserServiceJpa implements UserService {
             log.debug("User deleted. " + user);
             return user;
         } catch (Exception e) {
-            throw new DeleteException("Failed to delete user with id  " + userId);
+            throw new SaveException("Failed to delete user with id  " + userId, e);
         }
     }
 

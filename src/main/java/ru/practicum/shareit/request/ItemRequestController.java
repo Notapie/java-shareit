@@ -1,12 +1,40 @@
 package ru.practicum.shareit.request;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.request.dto.IRObjectMapper;
+import ru.practicum.shareit.request.dto.IRRequestDto;
+import ru.practicum.shareit.request.dto.IRResponseDto;
+import ru.practicum.shareit.request.service.ItemRequestService;
 
-/**
- * TODO Sprint add-item-requests.
- */
+import java.util.Collection;
+
 @RestController
 @RequestMapping(path = "/requests")
+@RequiredArgsConstructor
 public class ItemRequestController {
+    private final ItemRequestService irService;
+
+    @PostMapping
+    public IRResponseDto addNewRequest(@RequestBody IRRequestDto irRequestDto,
+                                       @RequestHeader("X-Sharer-User-Id") int ownerId) {
+        return IRObjectMapper.toResponseDto(irService.createNew(irRequestDto, ownerId));
+    }
+
+    @GetMapping
+    public Collection<IRResponseDto> getAllUserRequests(@RequestHeader("X-Sharer-User-Id") int ownerId) {
+        return IRObjectMapper.toResponseDto(irService.getAllByOwner(ownerId));
+    }
+
+    @GetMapping("/all")
+    public Collection<IRResponseDto> getAllRequests(@RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "10") int size,
+                                                    @RequestHeader("X-Sharer-User-Id") int userId) {
+        return IRObjectMapper.toResponseDto(irService.getAll(userId, from, size));
+    }
+
+    @GetMapping("/{requestId}")
+    public IRResponseDto getRequest(@PathVariable int requestId, @RequestHeader("X-Sharer-User-Id") int userId) {
+        return IRObjectMapper.toResponseDto(irService.getById(userId, requestId));
+    }
 }

@@ -35,16 +35,18 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingResponseDto> getAllBookerBookings(@RequestParam(value = "state", required = false)
-                                                                   String state,
-                                                               @RequestHeader("X-Sharer-User-Id") int bookerId) {
-        return BookingObjectMapper.toBookingResponseDto(bookingService.getAllForBooker(bookerId, state));
+    public Collection<BookingResponseDto> getAllBookerBookings(@RequestParam(value = "state", required = false) String state,
+                                                               @RequestHeader("X-Sharer-User-Id") int bookerId,
+                                                               @RequestParam(defaultValue = "0") int from,
+                                                               @RequestParam(defaultValue = "10") int size) {
+        return BookingObjectMapper.toBookingResponseDto(bookingService.getAllForBooker(bookerId, state, from, size));
     }
 
     @GetMapping("/owner")
-    public Collection<BookingResponseDto> getAllOwnerBookings(@RequestParam(value = "state", required = false)
-                                                                  String state,
-                                                               @RequestHeader("X-Sharer-User-Id") int ownerId) {
-        return BookingObjectMapper.toBookingResponseDto(bookingService.getAllForOwner(ownerId, state));
+    public Collection<BookingResponseDto> getAllOwnerBookings(@RequestParam(value = "state", required = false) String state,
+                                                              @RequestHeader("X-Sharer-User-Id") int ownerId,
+                                                              @RequestParam(defaultValue = "0") int from,
+                                                              @RequestParam(defaultValue = "10") int size) {
+        return BookingObjectMapper.toBookingResponseDto(bookingService.getAllForOwner(ownerId, state, from, size));
     }
 }

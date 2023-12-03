@@ -10,4 +10,5 @@ public class ItemResponseDto {
     String name;
     String description;
     Boolean available;
+    Integer requestId;
 }

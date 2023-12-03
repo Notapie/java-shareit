@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentJpaRepository;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestJpaUtil;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
@@ -32,6 +34,7 @@ public class ItemServiceJpa implements ItemService {
     private final ItemJpaUtil itemUtil;
     private final UserJpaUtil userUtil;
     private final BookingJpaUtil bookingUtil;
+    private final ItemRequestJpaUtil irUtil;
 
     @Override
     public Item create(ItemRequestDto itemRequestDto, int userId) {
@@ -46,13 +49,20 @@ public class ItemServiceJpa implements ItemService {
         // build new item entity
         final Item item = ItemObjectMapper.fromItemRequestDto(itemRequestDto, owner);
 
+        // add item request
+        if (itemRequestDto.getRequestId() != null) {
+            // get item request
+            final ItemRequest itemRequest = irUtil.requireFindById(itemRequestDto.getRequestId());
+            item.setItemRequest(itemRequest);
+        }
+
         // save new item
         try {
             Item savedItem = itemRepository.save(item);
             log.debug("Item created." + item);
             return savedItem;
         } catch (Exception e) {
-            throw new SaveException("Failed to save a new item" + item, e);
+            throw new SaveException("Failed to save a new item. " + item, e);
         }
     }
 
@@ -90,7 +100,7 @@ public class ItemServiceJpa implements ItemService {
             log.debug("Item updated. " + savedItem);
             return savedItem;
         } catch (Exception e) {
-            throw new SaveException("Failed to save updated item" + item, e);
+            throw new SaveException("Failed to save updated item. " + item, e);
         }
     }
 
@@ -193,6 +203,7 @@ public class ItemServiceJpa implements ItemService {
                 Collection<CommentResponseDto> itemComments = dto.getComments();
                 if (itemComments == null) {
                     itemComments = new ArrayList<>();
+                    dto.setComments(itemComments);
                 }
 
                 itemComments.add(CommentObjectMapper.toResponseDto(comment));
@@ -213,7 +224,7 @@ public class ItemServiceJpa implements ItemService {
 
     private void validateToCreate(ItemRequestDto itemRequestDto) {
         if (itemRequestDto.getAvailable() == null) {
-            throw new ValidationException("Available property cannot is null");
+            throw new ValidationException("Available property cannot be null");
         }
 
         if (!StringUtils.hasText(itemRequestDto.getName())) {

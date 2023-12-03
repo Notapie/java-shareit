@@ -3,6 +3,8 @@ package ru.practicum.shareit.booking.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.dto.BookingObjectMapper;
@@ -132,54 +134,74 @@ public class BookingServiceJpa implements BookingService {
     }
 
     @Override
-    public Collection<Booking> getAllForBooker(int bookerId, String bookingState) {
+    public Collection<Booking> getAllForBooker(int bookerId, String bookingState, int fromIndex, int size) {
+        if (fromIndex < 0 || size <= 0) {
+            throw new ValidationException("From or size params cannot be negative, size cannot be 0");
+        }
+        final int page = fromIndex / size;
+
         userUtil.assertExists(bookerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByBookerId(bookerId);
+            return bookingRepository.findBookingsByBookerId(bookerId,
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByBookerIdAndStatus(bookerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByBookerIdAndStatus(bookerId, Booking.Status.valueOf(bookingState),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now());
+            return bookingRepository.findBookingsByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findCurrentBookingsByBookerIdAndCurrentTime(bookerId, LocalDateTime.now());
+            return bookingRepository.findCurrentBookingsByBookerIdAndCurrentTime(bookerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time", "end_time").descending()));
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now());
+            return bookingRepository.findBookingsByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         throw new UnknownStateException("Invalid state");
     }
 
     @Override
-    public Collection<Booking> getAllForOwner(int ownerId, String bookingState) {
+    public Collection<Booking> getAllForOwner(int ownerId, String bookingState, int fromIndex, int size) {
+        if (fromIndex < 0 || size <= 0) {
+            throw new ValidationException("From or size params cannot be negative, size cannot be 0");
+        }
+        final int page = fromIndex / size;
+
         userUtil.assertExists(ownerId);
 
         if (!StringUtils.hasText(bookingState) || bookingState.equals("ALL")) {
-            return bookingRepository.findBookingsByItemOwnerId(ownerId);
+            return bookingRepository.findBookingsByItemOwnerId(ownerId,
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("WAITING") || bookingState.equals("REJECTED")) {
-            return bookingRepository.findBookingsByItemOwnerIdAndStatus(ownerId, Booking.Status.valueOf(bookingState));
+            return bookingRepository.findBookingsByItemOwnerIdAndStatus(ownerId, Booking.Status.valueOf(bookingState),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("PAST")) {
-            return bookingRepository.findBookingsByItemOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now());
+            return bookingRepository.findBookingsByItemOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         if (bookingState.equals("CURRENT")) {
-            return bookingRepository.findCurrentBookingsByItemOwnerIdAndCurrentTime(ownerId, LocalDateTime.now());
+            return bookingRepository.findCurrentBookingsByItemOwnerIdAndCurrentTime(ownerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time", "end_time").descending()));
         }
 
         if (bookingState.equals("FUTURE")) {
-            return bookingRepository.findBookingsByItemOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now());
+            return bookingRepository.findBookingsByItemOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now(),
+                    PageRequest.of(page, size, Sort.by("start_time").descending()));
         }
 
         throw new UnknownStateException("Invalid state");
