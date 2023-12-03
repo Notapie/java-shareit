@@ -11,12 +11,16 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseExtendedDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.IRRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserRequestDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserServiceJpa;
@@ -31,13 +35,16 @@ public class ItemServiceIntegrationTest {
     private final ItemServiceJpa itemService;
     private final UserServiceJpa userService;
     private final BookingService bookingService;
+    private final ItemRequestService irService;
 
     @Test
     @DisplayName("should success create new item")
     public void shouldCreateNewItem() {
         final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final ItemRequest ir = irService.createNew(IRRequestDto.builder().description("desc").build(), booker.getId());
         final Item item = itemService.create(new ItemRequestDto("test item", "test item desc",
-                true, null), owner.getId());
+                true, ir.getId()), owner.getId());
 
         Assertions.assertEquals(owner.getId(), item.getOwner().getId());
         Assertions.assertEquals(owner.getName(), item.getOwner().getName());
@@ -85,12 +92,15 @@ public class ItemServiceIntegrationTest {
     @DisplayName("should get item by id")
     public void getItemById() {
         final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User user = userService.create(new UserRequestDto("user", "user@yandex.ru"));
         final Item item = itemService.create(new ItemRequestDto("test item", "test item desc",
                 true, null), owner.getId());
 
-        final ItemResponseExtendedDto result = itemService.getById(item.getId(), owner.getId());
+        final ItemResponseExtendedDto resultOwner = itemService.getById(item.getId(), owner.getId());
+        final ItemResponseExtendedDto result = itemService.getById(item.getId(), user.getId());
 
         Assertions.assertEquals(item.getId(), result.getId());
+        Assertions.assertEquals(item.getId(), resultOwner.getId());
     }
 
     @Test
@@ -163,6 +173,7 @@ public class ItemServiceIntegrationTest {
     @DisplayName("should error if comment invalid create")
     public void commentInvalidCreate() {
         final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User user = userService.create(new UserRequestDto("user", "user@yandex.ru"));
         final Item item = itemService.create(new ItemRequestDto("test item", "test item desc",
                 true, null), owner.getId());
 
@@ -171,6 +182,22 @@ public class ItemServiceIntegrationTest {
             itemService.addComment(CommentRequestDto.builder()
                     .text(null)
                     .build(), item.getId(), 123);
+        });
+
+        // user never booked item
+        Assertions.assertThrows(ValidationException.class, () -> {
+            itemService.addComment(CommentRequestDto.builder()
+                    .text("123")
+                    .build(), item.getId(), user.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("should error if item not found")
+    public void itemNotFound() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.getById(12, owner.getId());
         });
     }
 }
