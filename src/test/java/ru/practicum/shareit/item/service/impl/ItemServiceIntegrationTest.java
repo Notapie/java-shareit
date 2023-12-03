@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseExtendedDto;
@@ -113,7 +115,62 @@ public class ItemServiceIntegrationTest {
         final Collection<Item> result = itemService.search("test");
         Assertions.assertEquals(item.getName(), result.iterator().next().getName());
 
-        final Collection<Item> emptyResult = itemService.search("asd");
+        final Collection<Item> emptyResult = itemService.search("");
         Assertions.assertEquals(0, emptyResult.size());
+    }
+
+    // exceptions
+
+    @Test
+    @DisplayName("should error if update non owner")
+    public void errorIfNonOwner() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User user = userService.create(new UserRequestDto("user", "user@yandex.ru"));
+        final Item item = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            itemService.update(user.getId(),
+                    item.getId(), ItemRequestDto.builder().name("updated name").build());
+        });
+    }
+
+    @Test
+    @DisplayName("should error if invalid create")
+    public void invalidCreate() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+
+        // available is null
+        Assertions.assertThrows(ValidationException.class, () -> {
+            itemService.create(new ItemRequestDto("test item", "test item desc",
+                    null, null), owner.getId());
+        });
+
+        // name is null
+        Assertions.assertThrows(ValidationException.class, () -> {
+            itemService.create(new ItemRequestDto(null, "test item desc",
+                    true, null), owner.getId());
+        });
+
+        // desc is null
+        Assertions.assertThrows(ValidationException.class, () -> {
+            itemService.create(new ItemRequestDto("test item", null,
+                    true, null), owner.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("should error if comment invalid create")
+    public void commentInvalidCreate() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final Item item = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        // comment text is null
+        Assertions.assertThrows(ValidationException.class, () -> {
+            itemService.addComment(CommentRequestDto.builder()
+                    .text(null)
+                    .build(), item.getId(), 123);
+        });
     }
 }
