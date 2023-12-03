@@ -17,6 +17,8 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -37,29 +39,34 @@ class BookingServiceJpaUnitTest {
     @InjectMocks
     BookingServiceJpa bookingService;
 
+    final int itemOwnerId = 1;
+    final int itemBookerId = 2;
+    final int itemId = 1;
+    final int bookingId = 1;
+
+    final private User itemOwner = new User(itemOwnerId, "itemOwner@yandex.ru", "Item Owner");
+    final private User itemBooker = new User(itemBookerId, "itemBooker@yandex.ru", "Item Booker");
+    final private Item bookedItem = new Item(
+            itemId,
+            "item name",
+            "item description",
+            true,
+            itemOwner,
+            null
+    );
+    final private BookingRequestDto bookingRequestDto = new BookingRequestDto(
+            bookedItem.getId(),
+            LocalDateTime.now().plusHours(1),
+            LocalDateTime.now().plusDays(1)
+    );
+    final private Booking expectedSavedBooking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, bookedItem,
+                    itemBooker).toBuilder()
+            .status(Booking.Status.WAITING)
+            .id(bookingId).build();
+
     @Test
     @DisplayName("should success create new booking")
     public void shouldSuccessCreateNewBooking() {
-        final User itemOwner = new User(1, "itemOwner@yandex.ru", "Item Owner");
-        final User itemBooker = new User(2, "itemBooker@yandex.ru", "Item Booker");
-        final Item bookedItem = new Item(
-                1,
-                "item name",
-                "item description",
-                true,
-                itemOwner,
-                null
-        );
-        final BookingRequestDto bookingRequestDto = new BookingRequestDto(
-                bookedItem.getId(),
-                LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusDays(1)
-        );
-        final Booking expectedBookingToSave = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, bookedItem,
-                itemBooker);
-        expectedBookingToSave.setStatus(Booking.Status.WAITING);
-        final Booking expectedSavedBooking = expectedBookingToSave.toBuilder().id(1).build();
-
         when(itemUtilMock.requireFindById(bookedItem.getId()))
                 .thenReturn(bookedItem);
         when(userUtilMock.requireFindById(itemBooker.getId()))
@@ -73,5 +80,67 @@ class BookingServiceJpaUnitTest {
         final Booking savedBooking = bookingService.create(bookingRequestDto, itemBooker.getId());
         Assertions.assertEquals(expectedSavedBooking.getId(), savedBooking.getId());
         Assertions.assertEquals(expectedSavedBooking.getBooker().getId(), savedBooking.getBooker().getId());
+    }
+
+    @Test
+    @DisplayName("should success approve booking status")
+    public void approveBookingStatus() {
+        when(bookingUtilMock.requireFindById(bookingId))
+                .thenReturn(expectedSavedBooking);
+        final Booking expectedApprovedBooking = expectedSavedBooking.toBuilder()
+                .status(Booking.Status.APPROVED).build();
+        when(bookingRepositoryMock.save(any()))
+                .thenReturn(expectedApprovedBooking);
+
+        final Booking savedBooking = bookingService.approve(
+                bookingId,
+                itemOwnerId,
+                true);
+
+        Assertions.assertEquals(expectedApprovedBooking.getId(), savedBooking.getId());
+        Assertions.assertEquals(expectedApprovedBooking.getStatus(), savedBooking.getStatus());
+    }
+
+    @Test
+    @DisplayName("should success get booking by id")
+    public void getBookingById() {
+        when(bookingUtilMock.requireFindById(bookingId))
+                .thenReturn(expectedSavedBooking);
+
+        final Booking result = bookingService.getById(bookingId, itemOwnerId);
+
+        Assertions.assertEquals(bookingId, result.getId());
+    }
+
+    @Test
+    @DisplayName("should success get all booker bookings")
+    public void getAllBookerBookings() {
+        when(bookingRepositoryMock.findBookingsByBookerId(anyInt(), any()))
+                .thenReturn(List.of(expectedSavedBooking));
+
+        final Collection<Booking> result = bookingService.getAllForBooker(
+                bookingId,
+                "ALL",
+                0,
+                10
+        );
+
+        Assertions.assertEquals(bookingId, result.iterator().next().getId());
+    }
+
+    @Test
+    @DisplayName("should success get all item owner bookings")
+    public void getAllOwnerBookings() {
+        when(bookingRepositoryMock.findBookingsByItemOwnerId(anyInt(), any()))
+                .thenReturn(List.of(expectedSavedBooking));
+
+        final Collection<Booking> result = bookingService.getAllForOwner(
+                itemOwnerId,
+                "ALL",
+                0,
+                10
+        );
+
+        Assertions.assertEquals(bookingId, result.iterator().next().getId());
     }
 }
