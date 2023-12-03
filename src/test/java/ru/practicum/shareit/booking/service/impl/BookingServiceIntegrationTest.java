@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserServiceJpa;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -38,5 +39,82 @@ public class BookingServiceIntegrationTest {
                 LocalDateTime.now().plusDays(1)), booker.getId());
 
         Assertions.assertEquals(booker.getId(), savedBooking.getBooker().getId());
+    }
+
+    @Test
+    @DisplayName("should approve booking")
+    public void approveBooking() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        final Booking savedBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)), booker.getId());
+
+        final Booking approvedBooking = bookingService.approve(savedBooking.getId(), owner.getId(), true);
+
+        Assertions.assertEquals(savedBooking.getId(), approvedBooking.getId());
+        Assertions.assertEquals(Booking.Status.APPROVED, approvedBooking.getStatus());
+    }
+
+    @Test
+    @DisplayName("should get all booker bookings")
+    public void getAllBookerBookings() throws InterruptedException {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        final Booking futureBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)), booker.getId());
+
+        final Booking currentBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusSeconds(3),
+                LocalDateTime.now().plusMinutes(1)), booker.getId());
+
+        final Booking pastBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusSeconds(1),
+                LocalDateTime.now().plusSeconds(2)), booker.getId());
+
+        Thread.sleep(3500);
+
+        final Booking resultCurrent = bookingService.getAllForBooker(booker.getId(), "CURRENT",  0, 10).iterator().next();
+        final Booking resultPast = bookingService.getAllForBooker(booker.getId(), "PAST",  0, 10).iterator().next();
+        final Booking resultFuture = bookingService.getAllForBooker(booker.getId(), "FUTURE",  0, 10).iterator().next();
+        final Collection<Booking> resultWaiting = bookingService.getAllForBooker(booker.getId(), "WAITING",  0, 10);
+
+        Assertions.assertEquals(futureBooking.getId(), resultFuture.getId());
+        Assertions.assertEquals(currentBooking.getId(), resultCurrent.getId());
+        Assertions.assertEquals(pastBooking.getId(), resultPast.getId());
+        Assertions.assertEquals(3, resultWaiting.size());
+    }
+
+    @Test
+    @DisplayName("should get all owner bookings")
+    public void getAllOwnerBookings() throws InterruptedException {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        final Booking futureBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)), booker.getId());
+
+        final Booking currentBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusSeconds(3),
+                LocalDateTime.now().plusMinutes(1)), booker.getId());
+
+        final Booking pastBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusSeconds(1),
+                LocalDateTime.now().plusSeconds(2)), booker.getId());
+
+        Thread.sleep(3500);
+
+        final Booking resultCurrent = bookingService.getAllForOwner(owner.getId(), "CURRENT",  0, 10).iterator().next();
+        final Booking resultPast = bookingService.getAllForOwner(owner.getId(), "PAST",  0, 10).iterator().next();
+        final Booking resultFuture = bookingService.getAllForOwner(owner.getId(), "FUTURE",  0, 10).iterator().next();
+        final Collection<Booking> resultWaiting = bookingService.getAllForOwner(owner.getId(), "WAITING",  0, 10);
+
+        Assertions.assertEquals(futureBooking.getId(), resultFuture.getId());
+        Assertions.assertEquals(currentBooking.getId(), resultCurrent.getId());
+        Assertions.assertEquals(pastBooking.getId(), resultPast.getId());
+        Assertions.assertEquals(3, resultWaiting.size());
     }
 }
