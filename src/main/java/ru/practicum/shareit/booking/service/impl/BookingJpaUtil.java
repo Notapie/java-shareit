@@ -17,12 +17,6 @@ import java.util.List;
 public class BookingJpaUtil {
     private final BookingJpaRepository bookingRepository;
 
-    public void assertExists(int bookingId) {
-        if (!bookingRepository.existsById(bookingId)) {
-            throw new NotFoundException("Booking with id " + bookingId + " not found");
-        }
-    }
-
     public Booking requireFindById(int bookingId) {
         if (!bookingRepository.existsById(bookingId)) {
             throw new NotFoundException("Booking with id " + bookingId + " not found");
