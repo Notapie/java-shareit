@@ -44,9 +44,9 @@ class BookingServiceJpaUnitTest {
     final int itemId = 1;
     final int bookingId = 1;
 
-    final private User itemOwner = new User(itemOwnerId, "itemOwner@yandex.ru", "Item Owner");
-    final private User itemBooker = new User(itemBookerId, "itemBooker@yandex.ru", "Item Booker");
-    final private Item bookedItem = new Item(
+    final User itemOwner = new User(itemOwnerId, "itemOwner@yandex.ru", "Item Owner");
+    final User itemBooker = new User(itemBookerId, "itemBooker@yandex.ru", "Item Booker");
+    final Item bookedItem = new Item(
             itemId,
             "item name",
             "item description",
@@ -54,12 +54,12 @@ class BookingServiceJpaUnitTest {
             itemOwner,
             null
     );
-    final private BookingRequestDto bookingRequestDto = new BookingRequestDto(
+    final BookingRequestDto bookingRequestDto = new BookingRequestDto(
             bookedItem.getId(),
             LocalDateTime.now().plusHours(1),
             LocalDateTime.now().plusDays(1)
     );
-    final private Booking expectedSavedBooking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, bookedItem,
+    final Booking expectedSavedBooking = BookingObjectMapper.fromBookingRequestDto(bookingRequestDto, bookedItem,
                     itemBooker).toBuilder()
             .status(Booking.Status.WAITING)
             .id(bookingId).build();
