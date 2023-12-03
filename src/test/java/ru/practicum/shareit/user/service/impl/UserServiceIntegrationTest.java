@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.SaveException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserRequestDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -73,5 +76,38 @@ public class UserServiceIntegrationTest {
         final User result = userService.getAll().iterator().next();
 
         Assertions.assertEquals(user.getId(), result.getId());
+    }
+
+    // exceptions
+
+    @Test
+    @DisplayName("should error if create with invalid data")
+    public void invalidCreate() {
+        // invalid email (validation exception)
+        Assertions.assertThrows(ValidationException.class, () -> {
+            final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner");
+            final User user = userService.create(userRequestDto);
+        });
+
+        // null email (validation exception)
+        Assertions.assertThrows(ValidationException.class, () -> {
+            final UserRequestDto userRequestDto = new UserRequestDto("owner", null);
+            final User user = userService.create(userRequestDto);
+        });
+
+        // double creating (save exception)
+        final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@asdasd.ru");
+        final User user = userService.create(userRequestDto);
+        Assertions.assertThrows(SaveException.class, () -> {
+            userService.create(userRequestDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should error if user not found")
+    public void notFound() {
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            userService.getById(1);
+        });
     }
 }
