@@ -9,8 +9,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UnknownStateException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.impl.ItemServiceJpa;
@@ -143,6 +145,77 @@ public class BookingServiceIntegrationTest {
 
         Assertions.assertThrows(UnknownStateException.class, () -> {
             bookingService.getAllForBooker(booker.getId(), "qwerty", 0, 10);
+        });
+        Assertions.assertThrows(UnknownStateException.class, () -> {
+            bookingService.getAllForOwner(booker.getId(), "qwerty", 0, 10);
+        });
+    }
+
+    @Test
+    @DisplayName("should error if invalid pageable params")
+    public void invalidPageable() {
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.getAllForBooker(booker.getId(), "qwerty", 0, 0);
+        });
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.getAllForOwner(booker.getId(), "qwerty", -1, 10);
+        });
+    }
+
+    @Test
+    @DisplayName("should error if invalid create")
+    public void invalidCreate() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        // null item id
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.create(new BookingRequestDto(null, LocalDateTime.now().plusHours(1),
+                    LocalDateTime.now().plusDays(1)), booker.getId());
+        });
+
+        // null start time
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.create(new BookingRequestDto(bookedItem.getId(), null,
+                    LocalDateTime.now().plusDays(1)), booker.getId());
+        });
+
+        // null end time
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                    null), booker.getId());
+        });
+
+        // start is before now
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().minusHours(1),
+                    LocalDateTime.now().plusDays(1)), booker.getId());
+        });
+
+        // start is before end
+        Assertions.assertThrows(ValidationException.class, () -> {
+            bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                    LocalDateTime.now().plusMinutes(1)), booker.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("should error if user not owner or booker")
+    public void errorIfNotFound() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                true, null), owner.getId());
+
+        final Booking savedBooking = bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)), booker.getId());
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            bookingService.getById(savedBooking.getId(), 145);
         });
     }
 }
