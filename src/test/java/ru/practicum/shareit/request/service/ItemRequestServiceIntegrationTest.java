@@ -30,4 +30,38 @@ public class ItemRequestServiceIntegrationTest {
         Assertions.assertEquals(owner.getName(), itemRequest.getOwner().getName());
         Assertions.assertEquals(owner.getEmail(), itemRequest.getOwner().getEmail());
     }
+
+    @Test
+    @DisplayName("should get all by owner")
+    public void getAllByOwner() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final ItemRequest itemRequest = irService.createNew(new IRRequestDto("IR desc"), owner.getId());
+
+        final ItemRequest result = irService.getAllByOwner(owner.getId()).iterator().next();
+
+        Assertions.assertEquals(itemRequest.getId(), result.getId());
+    }
+
+    @Test
+    @DisplayName("should get all")
+    public void getAll() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User user = userService.create(new UserRequestDto("user", "user@yandex.ru"));
+        final ItemRequest itemRequest = irService.createNew(new IRRequestDto("IR desc"), owner.getId());
+
+        final ItemRequest result = irService.getAll(user.getId(), 0, 10).iterator().next();
+
+        Assertions.assertEquals(itemRequest.getId(), result.getId());
+    }
+
+    @Test
+    @DisplayName("should get ir by id")
+    public void getById() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final ItemRequest itemRequest = irService.createNew(new IRRequestDto("IR desc"), owner.getId());
+
+        final ItemRequest result = irService.getById(owner.getId(), itemRequest.getId());
+
+        Assertions.assertEquals(itemRequest.getId(), result.getId());
+    }
 }

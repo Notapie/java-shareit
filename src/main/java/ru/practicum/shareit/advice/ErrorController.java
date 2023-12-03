@@ -31,15 +31,6 @@ public class ErrorController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse alreadyExists(final AlreadyExistsException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse(
-                "Already exists", e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse saveError(final SaveException e) {
         log.error(e.getMessage());
         return new ErrorResponse(
