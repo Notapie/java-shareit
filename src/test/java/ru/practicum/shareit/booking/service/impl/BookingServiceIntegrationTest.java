@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.UnavailableException;
+import ru.practicum.shareit.exception.UnknownStateException;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.impl.ItemServiceJpa;
@@ -116,5 +118,31 @@ public class BookingServiceIntegrationTest {
         Assertions.assertEquals(currentBooking.getId(), resultCurrent.getId());
         Assertions.assertEquals(pastBooking.getId(), resultPast.getId());
         Assertions.assertEquals(3, resultWaiting.size());
+    }
+
+    // exceptions
+
+    @Test
+    @DisplayName("cannot create booking if item is not available")
+    public void cannotCreateIfUnavailable() {
+        final User owner = userService.create(new UserRequestDto("owner", "owner@yandex.ru"));
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+        final Item bookedItem = itemService.create(new ItemRequestDto("test item", "test item desc",
+                false, null), owner.getId());
+
+        Assertions.assertThrows(UnavailableException.class, () -> {
+            bookingService.create(new BookingRequestDto(bookedItem.getId(), LocalDateTime.now().plusHours(1),
+                    LocalDateTime.now().plusDays(1)), booker.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("should error if get with unknown state")
+    public void unknownState() {
+        final User booker = userService.create(new UserRequestDto("booker", "booker@yandex.ru"));
+
+        Assertions.assertThrows(UnknownStateException.class, () -> {
+            bookingService.getAllForBooker(booker.getId(), "qwerty", 0, 10);
+        });
     }
 }
