@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.impl.UserJpaUtil;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
