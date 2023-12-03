@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 @RequiredArgsConstructor
 public class ItemRequestDto {
     String name;

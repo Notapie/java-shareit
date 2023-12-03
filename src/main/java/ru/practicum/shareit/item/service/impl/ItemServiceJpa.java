@@ -203,6 +203,7 @@ public class ItemServiceJpa implements ItemService {
                 Collection<CommentResponseDto> itemComments = dto.getComments();
                 if (itemComments == null) {
                     itemComments = new ArrayList<>();
+                    dto.setComments(itemComments);
                 }
 
                 itemComments.add(CommentObjectMapper.toResponseDto(comment));
