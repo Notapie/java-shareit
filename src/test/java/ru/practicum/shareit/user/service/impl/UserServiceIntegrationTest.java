@@ -25,4 +25,53 @@ public class UserServiceIntegrationTest {
         Assertions.assertEquals(user.getName(), userRequestDto.getName());
         Assertions.assertEquals(user.getEmail(), userRequestDto.getEmail());
     }
+
+    @Test
+    @DisplayName("should update user")
+    public void updateUser() {
+        final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@yandex.ru");
+        final User user = userService.create(userRequestDto);
+
+        final UserRequestDto updateRequest = UserRequestDto.builder()
+                .name("owner updated")
+                .build();
+
+        final User updatedUser = userService.update(user.getId(), updateRequest);
+
+        Assertions.assertEquals(user.getId(), updatedUser.getId());
+        Assertions.assertEquals(user.getName(), "owner updated");
+    }
+
+    @Test
+    @DisplayName("should delete by id")
+    public void deleteUserById() {
+        final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@yandex.ru");
+        final User user = userService.create(userRequestDto);
+
+        final User deleted = userService.deleteById(user.getId());
+
+        Assertions.assertEquals(user.getId(), deleted.getId());
+    }
+
+    @Test
+    @DisplayName("should get by id")
+    public void getById() {
+        final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@yandex.ru");
+        final User user = userService.create(userRequestDto);
+
+        final User result = userService.getById(user.getId());
+
+        Assertions.assertEquals(user.getId(), result.getId());
+    }
+
+    @Test
+    @DisplayName("should get all users")
+    public void getAll() {
+        final UserRequestDto userRequestDto = new UserRequestDto("owner", "owner@yandex.ru");
+        final User user = userService.create(userRequestDto);
+
+        final User result = userService.getAll().iterator().next();
+
+        Assertions.assertEquals(user.getId(), result.getId());
+    }
 }
